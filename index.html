@@ -31,7 +31,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="style.css?v=3" />
+<link rel="stylesheet" href="style.css?v=4" />
 </head>
 <body>
 <div class="vignette" aria-hidden="true"></div>
@@ -73,6 +73,7 @@
       </div>
       <h1 class="wordmark">Couplet</h1>
       <p class="tagline">word games for two</p>
+      <p class="join-teaser">Five little games. Every answer stays sealed<br />till you've both played.</p>
 
       <label class="room-label" for="name-input">Your name</label>
       <input id="name-input" class="room-input name-input" maxlength="14" autocomplete="given-name" spellcheck="false" placeholder="who's playing?" />
@@ -327,6 +328,7 @@
     <h2 class="modal-title" id="modal-title"></h2>
     <p class="modal-body" id="modal-body"></p>
     <div class="modal-actions">
+      <button class="ghost-btn hidden" id="modal-share">brag a little ♥</button>
       <button class="ghost-btn" id="modal-close">close</button>
       <button class="submit-btn" id="modal-again">play again</button>
     </div>
@@ -385,11 +387,11 @@
 
 <div class="float-layer" id="float-layer" aria-hidden="true"></div>
 
-<script src="vendor/supabase.js?v=3"></script>
-<script src="config.js?v=3"></script>
-<script src="puzzles.js?v=3"></script>
-<script src="spectrums.js?v=3"></script>
-<script src="inklings.js?v=3"></script>
-<script type="module" src="app.js?v=3"></script>
+<script src="vendor/supabase.js?v=4"></script>
+<script src="config.js?v=4"></script>
+<script src="puzzles.js?v=4"></script>
+<script src="spectrums.js?v=4"></script>
+<script src="inklings.js?v=4"></script>
+<script type="module" src="app.js?v=4"></script>
 </body>
 </html>

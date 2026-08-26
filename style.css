@@ -177,6 +177,14 @@ body {
   -webkit-background-clip: text; background-clip: text; color: transparent;
 }
 .wordmark-sm { font-size: 2rem; text-align: center; margin-top: 10px; }
+.join-teaser {
+  margin: 0.4rem 0 1.6rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--linen-dim);
+  opacity: 0.85;
+  text-align: center;
+}
 .tagline { color: var(--linen-dim); font-size: 0.95rem; margin-bottom: 26px; letter-spacing: 0.14em; }
 
 .join-q { font-family: "Fraunces", serif; font-size: 1.25rem; font-weight: 500; margin-bottom: 6px; }

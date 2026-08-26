@@ -225,3 +225,27 @@ export function validateDeck(deck) {
       problems.push(`fourLeads[${i}]: must be a non-empty string`);
   return problems;
 }
+
+/* ---------------- share cards ----------------
+ * Spoiler-free result grids in the emoji language group chats already read
+ * fluently — recognition does the explaining, the grid poses the riddle
+ * without spoiling it, and "together" is the one brag a solo puzzle can't
+ * make. The URL rides along so the brag carries its own door in. */
+const DUET_EMOJI = { g: "🟩", y: "🟨", x: "⬛" };
+
+export function duetShareCard(scores, streak, url) {
+  const grid = scores
+    .map((row) => row.map((v) => DUET_EMOJI[v] ?? "⬛").join(""))
+    .join("\n");
+  const streakBit = streak > 1 ? ` · streak ${streak}` : "";
+  return `Couplet Duet — got it in ${scores.length}, together${streakBit} ♥\n${grid}\n${url}`;
+}
+
+const TANGLE_EMOJI = ["🟨", "🟩", "🟦", "🟪"];
+
+export function tangleShareCard(foundGroups, mistakes, puzzleNo, url) {
+  const rows = foundGroups.map((g) => (TANGLE_EMOJI[g] ?? "🟪").repeat(4)).join("\n");
+  const miss =
+    mistakes === 0 ? "not a single miss" : `${mistakes} miss${mistakes > 1 ? "es" : ""}`;
+  return `Couplet Tangle #${puzzleNo} — untangled together, ${miss} ♥\n${rows}\n${url}`;
+}

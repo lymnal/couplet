@@ -3,6 +3,8 @@
 import {
   applyDeckContent,
   validateDeck,
+  duetShareCard,
+  tangleShareCard,
   otherSlot,
   slotClass,
   hashStr,
@@ -21,7 +23,7 @@ import {
   pickAttuneSpectrums,
   inkDealPool,
   duetStreakAfterWin,
-} from "./lib.js?v=3";
+} from "./lib.js?v=4";
 
 const CFG = window.COUPLET_CONFIG;
 /* vendored UMD build (vendor/supabase.js, pinned 2.112.4) — a CDN module
@@ -30,7 +32,7 @@ const CFG = window.COUPLET_CONFIG;
 const { createClient } = window.supabase;
 const PUZZLES = window.TANGLE_PUZZLES;
 /* asset version — ./bump.sh keeps this in step with index.html and sw.js */
-const ASSET_VERSION = "3";
+const ASSET_VERSION = "4";
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => [...document.querySelectorAll(sel)];
 
@@ -1671,6 +1673,11 @@ function submitGuess() {
           "duet",
           "You two ✨",
           `“${duetAnswer().toUpperCase()}” in ${state.duet.guesses.length} — streak ${state.stats.streak} ♥\n${winLine()}`,
+          duetShareCard(
+            state.duet.guesses.map((g) => scoreGuess(g.w, duetAnswer())),
+            state.stats.streak,
+            location.origin + location.pathname,
+          ),
         );
       } else {
         openModal(
@@ -1757,6 +1764,12 @@ function renderTangle() {
             : "Got there together.") +
             "\n" +
             winLine(),
+          tangleShareCard(
+            t.found.map((f) => f.g),
+            t.mistakes,
+            t.puzzleId + 1,
+            location.origin + location.pathname,
+          ),
         );
       } else {
         const missed = puzzle()
@@ -1908,13 +1921,16 @@ function toast(msg, ms = 3200) {
   toastTimer = setTimeout(() => t.classList.remove("show"), ms);
 }
 let modalGame = null;
-function openModal(game, title, body) {
+function openModal(game, title, body, brag = null) {
   modalGame = game;
+  modalBrag = brag;
   $("#modal-eyebrow").textContent = game === "duet" ? "duet" : "tangle";
   $("#modal-title").textContent = title;
   $("#modal-body").textContent = body;
+  $("#modal-share").classList.toggle("hidden", !brag);
   $("#modal").classList.remove("hidden");
 }
+let modalBrag = null;
 function closeModal() {
   $("#modal").classList.add("hidden");
 }
@@ -2158,6 +2174,21 @@ function wire() {
   });
 
   $("#modal-close").addEventListener("click", closeModal);
+  /* the brag is the invitation: a spoiler-free grid the group chat already
+     knows how to read, with the door to the parlor riding along */
+  $("#modal-share").addEventListener("click", async () => {
+    if (!modalBrag) return;
+    if (navigator.share) {
+      try {
+        await navigator.share({ text: modalBrag });
+      } catch {
+        /* dismissed */
+      }
+    } else {
+      await navigator.clipboard.writeText(modalBrag);
+      toast("copied — drop it in the group chat ♥");
+    }
+  });
   $("#modal-again").addEventListener("click", () => {
     closeModal();
     if (modalGame === "duet") $("#duet-new-btn").click();

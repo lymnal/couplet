@@ -325,7 +325,10 @@ test("applyDeckContent replaces in place and keeps array identity", () => {
 
 test("applyDeckContent with null restores pristine content", () => {
   const { live, pristine } = mkContent();
-  applyDeckContent(live, pristine, { spectrums: [["A", "B"]], fourLeads: ["x?"] });
+  applyDeckContent(live, pristine, {
+    spectrums: [["A", "B"]],
+    fourLeads: ["x?"],
+  });
   applyDeckContent(live, pristine, null);
   assert.deepEqual(live.spectrums, pristine.spectrums);
   assert.deepEqual(live.fourLeads, pristine.fourLeads);
@@ -333,7 +336,10 @@ test("applyDeckContent with null restores pristine content", () => {
 
 test("applyDeckContent ignores empty or non-array keys", () => {
   const { live, pristine } = mkContent();
-  const custom = applyDeckContent(live, pristine, { tangle: [], inklings: "nope" });
+  const custom = applyDeckContent(live, pristine, {
+    tangle: [],
+    inklings: "nope",
+  });
   assert.equal(custom.tangle, false);
   assert.equal(custom.inklings, false);
   assert.deepEqual(live.inklings, pristine.inklings);
@@ -368,4 +374,37 @@ test("validateDeck enforces tangle shape and 16 unique words", () => {
   const short = JSON.parse(JSON.stringify(ok));
   short.tangle[0].groups.pop();
   assert.ok(validateDeck(short).length);
+});
+
+/* ---------------- share cards ---------------- */
+
+import { duetShareCard, tangleShareCard } from "./lib.js";
+
+test("duetShareCard renders spoiler-free grid with couple framing", () => {
+  const card = duetShareCard(
+    [
+      ["x", "y", "x", "x", "g"],
+      ["g", "g", "g", "g", "g"],
+    ],
+    12,
+    "https://example.test/",
+  );
+  assert.ok(card.includes("in 2, together"));
+  assert.ok(card.includes("streak 12"));
+  assert.ok(card.includes("⬛🟨⬛⬛🟩\n🟩🟩🟩🟩🟩"));
+  assert.ok(card.includes("https://example.test/"));
+  assert.ok(!card.match(/[A-Z]{5}/)); // never leaks the answer
+});
+
+test("duetShareCard omits streak when there is none to brag about", () => {
+  assert.ok(!duetShareCard([[..."ggggg"]], 1, "u").includes("streak"));
+});
+
+test("tangleShareCard renders solve order in the connections palette", () => {
+  const card = tangleShareCard([3, 0, 1, 2], 0, 85, "u");
+  assert.ok(card.startsWith("Couplet Tangle #85"));
+  assert.ok(card.includes("not a single miss"));
+  assert.ok(card.includes("🟪🟪🟪🟪\n🟨🟨🟨🟨\n🟩🟩🟩🟩\n🟦🟦🟦🟦"));
+  assert.ok(tangleShareCard([0], 1, 1, "u").includes("1 miss ♥"));
+  assert.ok(tangleShareCard([0], 2, 1, "u").includes("2 misses"));
 });
