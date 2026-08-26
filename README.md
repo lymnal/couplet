@@ -81,6 +81,8 @@ by its code — share it only with the one person you want inside.
 
 ```bash
 node --test lib.test.js   # merge logic, scoring, queue rules
+./backup.sh YOURCODE      # everything the parlor holds, into ./backups
+./backup.sh --install YOURCODE   # …twice a week, automatically (macOS)
 ```
 
 ## Why it's like this
