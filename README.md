@@ -22,7 +22,7 @@
 | **Attune** | One of you gets a secret dial position and writes a clue; the other reads their mind. Scored by closeness, not by winning. 100 spectrums. |
 | **Inklings** | "What would they order at 2am?" — you answer about yourself, they guess, answers stay sealed till both are in. 100 cards. |
 
-Every puzzle, prompt, and spectrum is hand-written. None of it is generated.
+Every puzzle, prompt, and spectrum is hand-crafted — none of it is filler.
 
 <p align="center">
   <img src="docs/shots/join.png"   width="24%" alt="The opening parlor — join or start one">
@@ -30,6 +30,16 @@ Every puzzle, prompt, and spectrum is hand-written. None of it is generated.
   <img src="docs/shots/tangle.png" width="24%" alt="Tangle — sort 16 words into 4 groups">
   <img src="docs/shots/attune.png" width="24%" alt="Attune — the dial">
 </p>
+
+## Decks
+
+The default content is written for any two people anywhere. But a parlor can
+carry a **personalized deck** — Tangle puzzles about your city, Inklings cards
+about your cat, prompts in your private dialect. A deck replaces any of the
+four content sets for that parlor alone; whatever it leaves out falls back to
+the defaults. [Request one](https://github.com/lymnal/couplet/issues/new?template=deck-request.yml),
+or make your own — the format, the rules, and the self-hosting SQL live in
+[decks/](decks/README.md).
 
 ## How two phones stay in step
 

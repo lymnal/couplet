@@ -1,0 +1,22 @@
+{
+  "name": "Example — coffee & rain",
+  "tangle": [
+    {
+      "groups": [
+        { "title": "Coffee vessels", "words": ["MUG", "TUMBLER", "DEMITASSE", "THERMOS"] },
+        { "title": "Rain sounds", "words": ["PATTER", "DRUM", "HISS", "DRIP"] },
+        { "title": "___ break", "words": ["COFFEE", "LUCKY", "SPRING", "TIE"] },
+        { "title": "Cozy verbs", "words": ["NESTLE", "BURROW", "CURL", "HUNKER"] }
+      ]
+    }
+  ],
+  "inklings": [
+    "What's @S's rainy-day ritual?",
+    "How does @S really take their coffee when no one's judging?"
+  ],
+  "spectrums": [
+    ["First sip", "Last drop"],
+    ["Dancing in the rain", "Watching from the window"]
+  ],
+  "fourLeads": ["What four things steamed up the windows of today, pleasantly?"]
+}

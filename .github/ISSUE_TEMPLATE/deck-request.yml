@@ -1,0 +1,49 @@
+name: Request a personalized deck
+description: Puzzles and prompts made for the two of you — your places, your food, your jokes.
+title: "Deck request: "
+labels: [deck-request]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Decks are hand-made, so the specific beats the general — "he narrates the
+        cat's inner monologue" makes a better puzzle than "he likes the cat."
+        Don't share anything you wouldn't want the deck-maker to read.
+  - type: input
+    id: who
+    attributes:
+      label: Who's it for?
+      description: First names or nicknames only — whatever the app should call you.
+      placeholder: Ryan & Brian
+    validations:
+      required: true
+  - type: input
+    id: occasion
+    attributes:
+      label: Occasion (if any)
+      placeholder: anniversary, long-distance survival kit, just because
+  - type: textarea
+    id: texture
+    attributes:
+      label: Ten specific things about you two
+      description: Foods, places, shows, rituals, running arguments, in-jokes. The more textured, the better the deck.
+      placeholder: |
+        - she orders the same three dumplings every time and calls it variety
+        - our first date was a ferry ride neither of us can navigate back to
+        - …
+    validations:
+      required: true
+  - type: checkboxes
+    id: games
+    attributes:
+      label: Which games should be personalized?
+      options:
+        - label: Tangle (word-grouping puzzles)
+        - label: Inklings (how-well-do-you-know-them cards)
+        - label: Attune (dial spectrums)
+        - label: Four Things (nightly prompts)
+  - type: textarea
+    id: limits
+    attributes:
+      label: Anything off-limits?
+      description: Topics the deck should steer around.
