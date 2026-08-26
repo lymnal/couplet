@@ -16,7 +16,7 @@
 
 | | |
 |---|---|
-| **Duet** | Wordle, but you alternate letters on the same board. 2,314 answers, 14,854 accepted guesses. |
+| **Duet** | Wordle, but you alternate letters on the same board. 1,500 answers, 15,369 accepted guesses. |
 | **Tangle** | Sort 16 words into 4 groups — 100 original puzzles, none borrowed from the NYT. |
 | **Four Things** | A nightly gratitude ritual. Each of you writes four things; they stay **sealed until you both share**. 100 rotating prompts. |
 | **Attune** | One of you gets a secret dial position and writes a clue; the other reads their mind. Scored by closeness, not by winning. 100 spectrums. |
