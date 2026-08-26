@@ -91,6 +91,9 @@ body {
 .orb-a.lit { background: var(--gold); box-shadow: 0 0 14px 2px rgba(22, 121, 75, 0.55); }
 .orb-b.lit { background: var(--aqua); box-shadow: 0 0 14px 2px rgba(110, 231, 183, 0.55); }
 .orb.lit { animation: breathe 4s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .orb.lit { animation: none; }
+}
 .orb.flare { animation: flare 0.7s ease; }
 @keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.18); } }
 @keyframes flare { 0% { transform: scale(1); } 35% { transform: scale(1.7); } 100% { transform: scale(1); } }

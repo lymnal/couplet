@@ -1,4 +1,3 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 /* pure logic lives in lib.js so it can be covered by `node --test` — see
    lib.test.js. Importing it here is what makes those tests meaningful. */
 import {
@@ -22,12 +21,16 @@ import {
   pickAttuneSpectrums,
   inkDealPool,
   duetStreakAfterWin,
-} from "./lib.js?v=2";
+} from "./lib.js?v=3";
 
 const CFG = window.COUPLET_CONFIG;
+/* vendored UMD build (vendor/supabase.js, pinned 2.112.4) — a CDN module
+   import can't be cached by the service worker across origins, which made
+   "works offline" depend on browser-cache luck */
+const { createClient } = window.supabase;
 const PUZZLES = window.TANGLE_PUZZLES;
 /* asset version — ./bump.sh keeps this in step with index.html and sw.js */
-const ASSET_VERSION = "2";
+const ASSET_VERSION = "3";
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => [...document.querySelectorAll(sel)];
 
@@ -1934,6 +1937,24 @@ function wire() {
       enterParlor();
     }),
   );
+
+  /* typing a partner's code shows who's already inside — the difference
+     between "am I in the right parlor?" and joining a typo by accident */
+  let rosterTimer = null;
+  let lastRosterCode = "";
+  $("#room-input").addEventListener("input", () => {
+    const code = $("#room-input").value.trim().toUpperCase();
+    clearTimeout(rosterTimer);
+    if (code === lastRosterCode) return;
+    lastRosterCode = "";
+    $("#label-a").textContent = "emerald";
+    $("#label-b").textContent = "mint";
+    if (code.length < 6) return;
+    rosterTimer = setTimeout(() => {
+      lastRosterCode = code;
+      fetchRoomRoster(code);
+    }, 450);
+  });
 
   $("#card-duet").addEventListener("click", () => {
     typed = "";

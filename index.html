@@ -21,6 +21,7 @@
 <meta name="twitter:title" content="Couplet · word games for two" />
 <meta name="twitter:description" content="Five word games for exactly two people. No accounts, no feed — just you two in a little parlor." />
 <meta name="twitter:image" content="https://lymnal.github.io/couplet/og.png" />
+<meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="Couplet" />
@@ -30,12 +31,18 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="style.css?v=2" />
+<link rel="stylesheet" href="style.css?v=3" />
 </head>
 <body>
 <div class="vignette" aria-hidden="true"></div>
 <div class="grain" aria-hidden="true"></div>
 
+<noscript>
+  <p style="text-align:center;padding:3rem 2rem;color:#f6efe3;font-family:system-ui,sans-serif">
+    Couplet needs JavaScript — it's a live two-player parlor that syncs
+    between phones.
+  </p>
+</noscript>
 <main id="app">
 
   <!-- ============ JOIN ============ -->
@@ -378,10 +385,11 @@
 
 <div class="float-layer" id="float-layer" aria-hidden="true"></div>
 
-<script src="config.js?v=2"></script>
-<script src="puzzles.js?v=2"></script>
-<script src="spectrums.js?v=2"></script>
-<script src="inklings.js?v=2"></script>
-<script type="module" src="app.js?v=2"></script>
+<script src="vendor/supabase.js?v=3"></script>
+<script src="config.js?v=3"></script>
+<script src="puzzles.js?v=3"></script>
+<script src="spectrums.js?v=3"></script>
+<script src="inklings.js?v=3"></script>
+<script type="module" src="app.js?v=3"></script>
 </body>
 </html>

@@ -6,7 +6,7 @@
  *
  * ASSET_V must match the ?v= in index.html — ./bump.sh keeps them in step.
  */
-const ASSET_V = "2";
+const ASSET_V = "3";
 const CACHE = `couplet-${ASSET_V}`;
 
 /* everything needed to boot with no network at all */
@@ -14,6 +14,7 @@ const SHELL = [
   "./",
   "./index.html",
   `./style.css?v=${ASSET_V}`,
+  `./vendor/supabase.js?v=${ASSET_V}`,
   `./config.js?v=${ASSET_V}`,
   `./puzzles.js?v=${ASSET_V}`,
   `./spectrums.js?v=${ASSET_V}`,
