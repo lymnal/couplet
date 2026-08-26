@@ -169,3 +169,59 @@ export const renderInkPrompt = (template, subjectName, partnerName) =>
     .replaceAll("@S's", subjectName ? `${subjectName}'s` : "their")
     .replaceAll("@S", subjectName ?? "they")
     .replaceAll("@P", partnerName ?? "your partner");
+
+/* ---------------- decks ----------------
+ * A parlor can carry a custom deck: full replacement lists for any of the
+ * four content sets. `live` holds the arrays the games actually read (the
+ * window globals, aliased at load) — so replacement must mutate IN PLACE,
+ * never reassign. Absent or invalid keys fall back to the pristine
+ * built-ins, so a partial deck (say, only inklings) is a valid deck. */
+export const DECK_KEYS = ["tangle", "inklings", "spectrums", "fourLeads"];
+
+export function applyDeckContent(live, pristine, deck) {
+  const custom = {};
+  for (const key of DECK_KEYS) {
+    const has = !!deck && Array.isArray(deck[key]) && deck[key].length > 0;
+    const src = has ? deck[key] : pristine[key];
+    live[key].length = 0;
+    live[key].push(...src);
+    custom[key] = has;
+  }
+  return custom;
+}
+
+/* Shape checks shared by the app (defensive) and the deck-authoring tools.
+ * Returns a list of human-readable problems; empty list = valid. */
+export function validateDeck(deck) {
+  const problems = [];
+  if (!deck || typeof deck !== "object") return ["deck is not an object"];
+  if (!DECK_KEYS.some((k) => Array.isArray(deck[k]) && deck[k].length))
+    problems.push("deck replaces nothing: include at least one of " + DECK_KEYS.join(", "));
+  for (const [i, p] of (deck.tangle ?? []).entries()) {
+    const where = `tangle[${i}]`;
+    if (!Array.isArray(p?.groups) || p.groups.length !== 4) {
+      problems.push(`${where}: needs exactly 4 groups`);
+      continue;
+    }
+    const words = [];
+    for (const [j, g] of p.groups.entries()) {
+      if (typeof g?.title !== "string" || !g.title.trim())
+        problems.push(`${where}.groups[${j}]: missing title`);
+      if (!Array.isArray(g?.words) || g.words.length !== 4)
+        problems.push(`${where}.groups[${j}] ("${g?.title}"): needs exactly 4 words`);
+      else words.push(...g.words.map((w) => String(w).trim().toUpperCase()));
+    }
+    if (words.length === 16 && new Set(words).size !== 16)
+      problems.push(`${where}: the 16 words must be unique`);
+  }
+  for (const [i, card] of (deck.inklings ?? []).entries())
+    if (typeof card !== "string" || !card.includes("@S"))
+      problems.push(`inklings[${i}]: must be a string mentioning @S`);
+  for (const [i, s] of (deck.spectrums ?? []).entries())
+    if (!Array.isArray(s) || s.length !== 2 || s.some((e) => typeof e !== "string" || !e.trim()))
+      problems.push(`spectrums[${i}]: must be [left, right] labels`);
+  for (const [i, lead] of (deck.fourLeads ?? []).entries())
+    if (typeof lead !== "string" || !lead.trim())
+      problems.push(`fourLeads[${i}]: must be a non-empty string`);
+  return problems;
+}

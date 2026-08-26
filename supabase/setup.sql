@@ -225,3 +225,25 @@ grant execute on function
   public.get_notes(text),
   public.del_note(text, text)
 to anon, authenticated;
+
+-- Decks (added 2026-08-26): optional per-parlor content packs. A deck fully
+-- replaces any of the four content sets (tangle / inklings / spectrums /
+-- fourLeads); absent keys fall back to the shipped defaults. Binding is a
+-- keepsake: kind 'deck', data = the deck id. Decks are immutable by
+-- convention — edit by minting a new id and re-pointing the room — which is
+-- what lets clients cache a deck forever. There is deliberately NO public
+-- write path: author decks in the SQL editor (or your own tooling).
+create table if not exists public.decks (
+  id         text primary key,
+  payload    jsonb not null,
+  created_at timestamptz not null default now()
+);
+alter table public.decks enable row level security;
+revoke all on public.decks from anon, authenticated;
+
+create or replace function public.get_deck(p_id text)
+returns jsonb
+language sql security definer set search_path = public as $$
+  select payload from public.decks where id = upper(p_id);
+$$;
+grant execute on function public.get_deck(text) to anon, authenticated;

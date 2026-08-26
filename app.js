@@ -2,6 +2,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 /* pure logic lives in lib.js so it can be covered by `node --test` — see
    lib.test.js. Importing it here is what makes those tests meaningful. */
 import {
+  applyDeckContent,
+  validateDeck,
   otherSlot,
   slotClass,
   hashStr,
@@ -20,12 +22,12 @@ import {
   pickAttuneSpectrums,
   inkDealPool,
   duetStreakAfterWin,
-} from "./lib.js?v=36";
+} from "./lib.js?v=2";
 
 const CFG = window.COUPLET_CONFIG;
 const PUZZLES = window.TANGLE_PUZZLES;
 /* asset version — ./bump.sh keeps this in step with index.html and sw.js */
-const ASSET_VERSION = "1";
+const ASSET_VERSION = "2";
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => [...document.querySelectorAll(sel)];
 
@@ -1152,6 +1154,89 @@ const FOUR_LEADS = [
   "What four things made today enough?",
 ];
 
+/* ---------------- decks ----------------
+ * A parlor can carry a personalized deck (keepsake kind "deck" holds a deck
+ * id; the decks table holds the content). The games read PUZZLES, SPECTRUMS,
+ * window.INKLINGS_DECK and FOUR_LEADS directly, so a deck is applied by
+ * mutating those arrays in place — LIVE_CONTENT aliases them, and
+ * PRISTINE_CONTENT keeps the shipped built-ins for fallback and for rooms
+ * with no deck. Decks are immutable by convention: editing one means minting
+ * a new id and re-pointing the room, which is what makes the localStorage
+ * cache safe to trust offline. */
+const LIVE_CONTENT = {
+  tangle: PUZZLES,
+  inklings: window.INKLINGS_DECK,
+  spectrums: SPECTRUMS,
+  fourLeads: FOUR_LEADS,
+};
+const PRISTINE_CONTENT = {
+  tangle: [...PUZZLES],
+  inklings: [...window.INKLINGS_DECK],
+  spectrums: [...SPECTRUMS],
+  fourLeads: [...FOUR_LEADS],
+};
+let activeDeckId = null;
+
+/* synchronous, runs before the first render — a decked parlor must never
+   flash the default puzzles, and a deckless one must never keep the previous
+   parlor's deck after a switch */
+function applyCachedDeck() {
+  applyDeckContent(LIVE_CONTENT, PRISTINE_CONTENT, null);
+  activeDeckId = null;
+  try {
+    const raw = localStorage.getItem("couplet_deck::" + room);
+    if (!raw) return;
+    const { id, payload } = JSON.parse(raw);
+    if (validateDeck(payload).length) return;
+    applyDeckContent(LIVE_CONTENT, PRISTINE_CONTENT, payload);
+    activeDeckId = id;
+  } catch {
+    /* a corrupt cache entry just means built-ins until refreshDeck runs */
+  }
+}
+
+async function refreshDeck() {
+  try {
+    const { data: id, error } = await supa.rpc("get_keepsake", {
+      p_code: room,
+      p_kind: "deck",
+    });
+    if (error) throw error;
+    if (!id) {
+      if (activeDeckId) {
+        applyDeckContent(LIVE_CONTENT, PRISTINE_CONTENT, null);
+        activeDeckId = null;
+        try {
+          localStorage.removeItem("couplet_deck::" + room);
+        } catch {}
+        renderAll();
+      }
+      return;
+    }
+    if (id === activeDeckId) return;
+    const { data: payload, error: deckErr } = await supa.rpc("get_deck", {
+      p_id: id,
+    });
+    if (deckErr) throw deckErr;
+    if (!payload || validateDeck(payload).length) {
+      reportError("deck", new Error(`deck ${id} missing or malformed`));
+      return;
+    }
+    applyDeckContent(LIVE_CONTENT, PRISTINE_CONTENT, payload);
+    activeDeckId = id;
+    try {
+      localStorage.setItem(
+        "couplet_deck::" + room,
+        JSON.stringify({ id, payload }),
+      );
+    } catch {}
+    renderAll();
+    reportOk();
+  } catch (err) {
+    reportError("deck", err);
+  }
+}
+
 function composeCard(prefill) {
   const card = document.createElement("div");
   card.className = "four-card";
@@ -2080,10 +2165,12 @@ async function enterParlor() {
      address bar — browser history, link previews, and screen shares all
      leak it. The invite link still carries it once; scrubbed after join. */
   history.replaceState(null, "", location.pathname);
+  applyCachedDeck();
   await loadWords();
   show("lobby");
   renderAll();
   await connect();
+  refreshDeck();
   flushQueue();
 }
 

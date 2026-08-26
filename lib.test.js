@@ -7,6 +7,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
+  applyDeckContent,
+  validateDeck,
   otherSlot,
   dayKeyFor,
   prevDay,
@@ -285,4 +287,85 @@ test("possessive reads grammatically with and without a name", () => {
     renderInkPrompt("What's on @S's wallpaper?", null, null),
     "What's on their wallpaper?",
   );
+});
+
+/* ---------------- decks ---------------- */
+
+const mkContent = () => {
+  const live = {
+    tangle: [{ groups: [] }],
+    inklings: ["What's @S's usual?"],
+    spectrums: [["Hot", "Cold"]],
+    fourLeads: ["What four things?"],
+  };
+  const pristine = {
+    tangle: [...live.tangle],
+    inklings: [...live.inklings],
+    spectrums: [...live.spectrums],
+    fourLeads: [...live.fourLeads],
+  };
+  return { live, pristine };
+};
+
+test("applyDeckContent replaces in place and keeps array identity", () => {
+  const { live, pristine } = mkContent();
+  const tangleRef = live.tangle;
+  const custom = applyDeckContent(live, pristine, {
+    inklings: ["Would @S do it?", "Could @S resist?"],
+  });
+  assert.equal(live.tangle, tangleRef); // same object, games keep their alias
+  assert.equal(live.inklings.length, 2);
+  assert.deepEqual(custom, {
+    tangle: false,
+    inklings: true,
+    spectrums: false,
+    fourLeads: false,
+  });
+});
+
+test("applyDeckContent with null restores pristine content", () => {
+  const { live, pristine } = mkContent();
+  applyDeckContent(live, pristine, { spectrums: [["A", "B"]], fourLeads: ["x?"] });
+  applyDeckContent(live, pristine, null);
+  assert.deepEqual(live.spectrums, pristine.spectrums);
+  assert.deepEqual(live.fourLeads, pristine.fourLeads);
+});
+
+test("applyDeckContent ignores empty or non-array keys", () => {
+  const { live, pristine } = mkContent();
+  const custom = applyDeckContent(live, pristine, { tangle: [], inklings: "nope" });
+  assert.equal(custom.tangle, false);
+  assert.equal(custom.inklings, false);
+  assert.deepEqual(live.inklings, pristine.inklings);
+});
+
+test("validateDeck accepts a partial deck and rejects junk", () => {
+  assert.equal(validateDeck({ inklings: ["What's @S's usual?"] }).length, 0);
+  assert.ok(validateDeck(null).length);
+  assert.ok(validateDeck({}).length); // replaces nothing
+  assert.ok(validateDeck({ inklings: ["no placeholder"] }).length);
+  assert.ok(validateDeck({ spectrums: [["only left"]] }).length);
+});
+
+test("validateDeck enforces tangle shape and 16 unique words", () => {
+  const g = (t, w) => ({ title: t, words: w });
+  const ok = {
+    tangle: [
+      {
+        groups: [
+          g("A", ["ONE", "TWO", "THREE", "FOUR"]),
+          g("B", ["FIVE", "SIX", "SEVEN", "EIGHT"]),
+          g("C", ["NINE", "TEN", "ELEVEN", "TWELVE"]),
+          g("D", ["THIRTEEN", "FOURTEEN", "FIFTEEN", "SIXTEEN"]),
+        ],
+      },
+    ],
+  };
+  assert.equal(validateDeck(ok).length, 0);
+  const dupes = JSON.parse(JSON.stringify(ok));
+  dupes.tangle[0].groups[3].words[3] = "one"; // case-insensitive collision
+  assert.ok(validateDeck(dupes).length);
+  const short = JSON.parse(JSON.stringify(ok));
+  short.tangle[0].groups.pop();
+  assert.ok(validateDeck(short).length);
 });
