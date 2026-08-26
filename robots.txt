@@ -1,0 +1,3 @@
+# A public product now — index away.
+User-agent: *
+Allow: /

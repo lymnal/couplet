@@ -1,0 +1,32 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: node --test lib.test.js
+      - name: Syntax-check every shipped script
+        run: |
+          for f in app.js lib.js sw.js puzzles.js spectrums.js inklings.js config.js; do
+            node --check "$f"
+          done
+      - name: Version pins agree (index / app / sw)
+        # bump.sh keeps these in step; CI fails if a hand edit drifts them,
+        # because drift means the service worker caches one build while the
+        # page asks for another.
+        run: |
+          v_html=$(grep -o 'style.css?v=[0-9]*' index.html | head -1 | grep -o '[0-9]*$')
+          v_sw=$(grep '^const ASSET_V = ' sw.js | grep -o '[0-9]*')
+          v_app=$(grep '^const ASSET_VERSION = ' app.js | grep -o '[0-9]*')
+          echo "html=$v_html sw=$v_sw app=$v_app"
+          [ "$v_html" = "$v_sw" ] && [ "$v_html" = "$v_app" ]

@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+<title>Couplet · word games for two</title>
+<meta name="description" content="Five word games for exactly two people. Open the link, send it to your person, play — no accounts, no feed, no downloads." />
+<meta name="theme-color" content="#191225" />
+<meta name="robots" content="index, follow" />
+
+<!-- Social preview — this app spreads by one person texting the link to one
+     other person, so the unfurl card in iMessage/WhatsApp IS the pitch. -->
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Couplet · word games for two" />
+<meta property="og:description" content="Five word games for exactly two people. No accounts, no feed — just you two in a little parlor." />
+<meta property="og:url" content="https://lymnal.github.io/couplet/" />
+<meta property="og:image" content="https://lymnal.github.io/couplet/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Couplet · word games for two" />
+<meta name="twitter:description" content="Five word games for exactly two people. No accounts, no feed — just you two in a little parlor." />
+<meta name="twitter:image" content="https://lymnal.github.io/couplet/og.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Couplet" />
+<link rel="icon" href="favicon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="favicon.svg" />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css?v=1" />
+</head>
+<body>
+<div class="vignette" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+
+<main id="app">
+
+  <!-- ============ JOIN ============ -->
+  <section id="screen-join" class="screen">
+    <!-- Ambient parlor: two aurora washes + rising motes. Pure CSS, no JS —
+         .hidden is display:none, so all of it stops the moment you step in. -->
+    <div class="join-sky" aria-hidden="true">
+      <div class="aurora aurora-a"></div>
+      <div class="aurora aurora-b"></div>
+      <span class="mote"><span></span></span>
+      <span class="mote"><span></span></span>
+      <span class="mote"><span></span></span>
+      <span class="mote"><span></span></span>
+      <span class="mote"><span></span></span>
+      <span class="mote"><span></span></span>
+      <span class="mote"><span></span></span>
+      <span class="mote"><span></span></span>
+      <span class="mote"><span></span></span>
+      <span class="mote"><span></span></span>
+      <span class="mote"><span></span></span>
+      <span class="mote"><span></span></span>
+    </div>
+    <div class="join-inner">
+      <div class="orb-duo hero-orbs" aria-hidden="true">
+        <span class="orb orb-a lit"></span>
+        <span class="orb-heart">♥</span>
+        <span class="orb orb-b lit"></span>
+      </div>
+      <h1 class="wordmark">Couplet</h1>
+      <p class="tagline">word games for two</p>
+
+      <label class="room-label" for="name-input">Your name</label>
+      <input id="name-input" class="room-input name-input" maxlength="14" autocomplete="given-name" spellcheck="false" placeholder="who's playing?" />
+
+      <!-- The glow buttons ARE the door — enterParlor() fires on tap. The old
+           label ("Pick your glow") read as a preference toggle, and first-time
+           visitors filled in a name and then hunted for a submit button that
+           does not exist. Say what the tap does. -->
+      <p class="join-q">Tap your glow to step in</p>
+      <div class="identity-row">
+        <button class="identity-btn id-a" data-slot="A"><span class="id-dot"></span><span class="id-name" id="label-a">emerald</span></button>
+        <button class="identity-btn id-b" data-slot="B"><span class="id-dot"></span><span class="id-name" id="label-b">mint</span></button>
+      </div>
+
+      <label class="room-label" for="room-input">Parlor code</label>
+      <input id="room-input" class="room-input" maxlength="24" autocomplete="off" spellcheck="false" />
+      <p class="room-hint">Same code on both phones puts you in the same parlor.</p>
+    </div>
+  </section>
+
+  <!-- ============ LOBBY ============ -->
+  <section id="screen-lobby" class="screen hidden">
+    <header class="bar">
+      <!-- Populated with the parlor code at runtime; keep the placeholder
+           neutral — it flashes before JS runs and ships in public source. -->
+      <div class="room-chip" id="lobby-room-chip">· ·</div>
+      <div class="orb-duo" id="orbs-lobby">
+        <span class="orb orb-a" data-orb="A"></span>
+        <span class="orb orb-b" data-orb="B"></span>
+      </div>
+    </header>
+
+    <h1 class="wordmark wordmark-sm">Couplet</h1>
+    <p class="presence-line" data-presenceline>&nbsp;</p>
+
+    <div class="photo-frame hidden" id="photo-frame">
+      <img id="photo-img" alt="the two of you" />
+    </div>
+    <button class="note-btn photo-add hidden" id="photo-add">📷 add a photo of us</button>
+    <input type="file" id="photo-file" accept="image/*" hidden />
+
+    <div class="game-cards">
+      <button class="game-card card-duet" id="card-duet">
+        <div class="card-motif" aria-hidden="true">
+          <span class="mini-tile t-g">D</span><span class="mini-tile t-y">U</span><span class="mini-tile">E</span><span class="mini-tile t-g">T</span>
+        </div>
+        <div class="card-text">
+          <span class="card-title">Duet</span>
+          <span class="card-sub">Guess the word — taking turns</span>
+        </div>
+        <span class="card-badge" id="duet-badge"></span>
+      </button>
+
+      <button class="game-card card-tangle" id="card-tangle">
+        <div class="card-motif motif-dots" aria-hidden="true">
+          <span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span><span class="dot d4"></span>
+        </div>
+        <div class="card-text">
+          <span class="card-title">Tangle</span>
+          <span class="card-sub">Sort 16 words into 4 groups</span>
+        </div>
+        <span class="card-badge" id="tangle-badge"></span>
+      </button>
+
+      <button class="game-card card-ritual" id="card-ritual">
+        <div class="card-motif motif-sparks" aria-hidden="true">
+          <span>✦</span><span>✦</span><span>✦</span><span>✦</span>
+        </div>
+        <div class="card-text">
+          <span class="card-title">Four Things</span>
+          <span class="card-sub">Tonight's gratitude — sealed till you both share</span>
+        </div>
+        <span class="card-badge" id="ritual-badge"></span>
+      </button>
+
+      <button class="game-card card-attune" id="card-attune">
+        <div class="card-motif motif-dial" aria-hidden="true">
+          <span class="dial-arc"></span><span class="dial-pin"></span>
+        </div>
+        <div class="card-text">
+          <span class="card-title">Attune</span>
+          <span class="card-sub">Read each other's minds on a dial</span>
+        </div>
+        <span class="card-badge" id="attune-badge"></span>
+      </button>
+
+      <button class="game-card card-inklings" id="card-inklings">
+        <div class="card-motif motif-ink" aria-hidden="true">
+          <span>?</span><span>!</span>
+        </div>
+        <div class="card-text">
+          <span class="card-title">Inklings</span>
+          <span class="card-sub">Guess what they'll say — sealed till you both answer</span>
+        </div>
+        <span class="card-badge" id="inklings-badge"></span>
+      </button>
+    </div>
+
+    <div class="stats-strip" id="stats-strip"></div>
+
+    <div class="notes-wall" id="notes-wall"></div>
+    <button class="note-btn" id="note-btn">💌 leave a little note</button>
+
+    <button class="invite-btn" id="invite-btn">Invite your partner — send the link</button>
+    <div class="footer-links">
+      <button class="switch-btn" id="rename-btn">change name</button>
+      <span class="footer-dot">·</span>
+      <button class="switch-btn" id="switch-btn">switch player · parlor</button>
+    </div>
+  </section>
+
+  <!-- ============ DUET ============ -->
+  <section id="screen-duet" class="screen hidden">
+    <header class="bar">
+      <button class="back-btn" data-back>‹ parlor</button>
+      <span class="screen-title">Duet</span>
+      <span class="room-chip room-chip-sm" data-roomchip></span>
+      <div class="orb-duo" id="orbs-duet">
+        <span class="orb orb-a" data-orb="A"></span>
+        <span class="orb orb-b" data-orb="B"></span>
+      </div>
+    </header>
+
+    <p class="presence-line presence-line-sm" data-presenceline>&nbsp;</p>
+    <div class="turn-pill" id="turn-pill">&nbsp;</div>
+
+    <div class="board" id="duet-board" aria-label="guess board"></div>
+
+    <div class="suggest-bar" id="suggest-bar"></div>
+    <div class="keyboard" id="keyboard"></div>
+
+    <div class="duet-footer">
+      <span class="mode-tag" id="duet-mode-tag">daily</span>
+      <button class="ghost-btn" id="duet-new-btn">another round</button>
+    </div>
+  </section>
+
+  <!-- ============ TANGLE ============ -->
+  <section id="screen-tangle" class="screen hidden">
+    <header class="bar">
+      <button class="back-btn" data-back>‹ parlor</button>
+      <span class="screen-title">Tangle</span>
+      <span class="room-chip room-chip-sm" data-roomchip></span>
+      <div class="orb-duo" id="orbs-tangle">
+        <span class="orb orb-a" data-orb="A"></span>
+        <span class="orb orb-b" data-orb="B"></span>
+      </div>
+    </header>
+
+    <p class="presence-line presence-line-sm" data-presenceline>&nbsp;</p>
+    <div class="tangle-status">
+      <button id="tangle-puzzle-tag" class="mode-tag mode-tag-btn" title="browse the puzzle book">puzzle 1 ▾</button>
+      <span class="hearts" id="tangle-hearts" title="tries left"></span>
+    </div>
+
+    <div class="solved-bands" id="solved-bands"></div>
+    <div class="tangle-grid" id="tangle-grid"></div>
+
+    <div class="tangle-controls">
+      <button class="ghost-btn" id="tangle-shuffle">shuffle</button>
+      <button class="ghost-btn" id="tangle-clear">deselect</button>
+      <button class="submit-btn" id="tangle-submit" disabled>submit</button>
+    </div>
+    <div class="duet-footer">
+      <button class="ghost-btn" id="tangle-new-btn">next puzzle</button>
+    </div>
+  </section>
+
+  <!-- ============ ATTUNE ============ -->
+  <section id="screen-attune" class="screen hidden">
+    <header class="bar">
+      <button class="back-btn" data-back>‹ parlor</button>
+      <span class="screen-title">Attune</span>
+      <span class="room-chip room-chip-sm" data-roomchip></span>
+      <div class="orb-duo" id="orbs-attune">
+        <span class="orb orb-a" data-orb="A"></span>
+        <span class="orb orb-b" data-orb="B"></span>
+      </div>
+    </header>
+
+    <p class="presence-line presence-line-sm" data-presenceline>&nbsp;</p>
+    <div class="attune-status">
+      <span class="mode-tag" id="attune-progress">&nbsp;</span>
+      <span class="mode-tag" id="attune-score">&nbsp;</span>
+    </div>
+
+    <div class="spectrum-labels">
+      <span class="spec-left" id="spec-left"></span>
+      <span class="spec-right" id="spec-right"></span>
+    </div>
+
+    <div class="dial-wrap" id="dial-wrap"></div>
+
+    <p class="attune-clue" id="attune-clue">&nbsp;</p>
+    <div class="attune-stage" id="attune-stage"></div>
+  </section>
+
+  <!-- ============ INKLINGS ============ -->
+  <section id="screen-inklings" class="screen hidden">
+    <header class="bar">
+      <button class="back-btn" data-back>‹ parlor</button>
+      <span class="screen-title">Inklings</span>
+      <span class="room-chip room-chip-sm" data-roomchip></span>
+      <div class="orb-duo" id="orbs-inklings">
+        <span class="orb orb-a" data-orb="A"></span>
+        <span class="orb orb-b" data-orb="B"></span>
+      </div>
+    </header>
+
+    <p class="presence-line presence-line-sm" data-presenceline>&nbsp;</p>
+    <div id="ink-stage"></div>
+  </section>
+
+  <!-- ============ FOUR THINGS ============ -->
+  <section id="screen-ritual" class="screen hidden">
+    <header class="bar">
+      <button class="back-btn" data-back>‹ parlor</button>
+      <span class="screen-title">Four Things</span>
+      <span class="room-chip room-chip-sm" data-roomchip></span>
+      <div class="orb-duo" id="orbs-ritual">
+        <span class="orb orb-a" data-orb="A"></span>
+        <span class="orb orb-b" data-orb="B"></span>
+      </div>
+    </header>
+
+    <p class="presence-line presence-line-sm" data-presenceline>&nbsp;</p>
+    <div id="ritual-tonight"></div>
+    <div class="arch-wrap" id="ritual-archive"></div>
+  </section>
+
+</main>
+
+<!-- emote fab -->
+<div class="emote-fab hidden" id="emote-fab">
+  <button class="emote-toggle" id="emote-toggle">♥</button>
+  <div class="emote-tray" id="emote-tray">
+    <button data-emote="❤️">❤️</button>
+    <button data-emote="😘">😘</button>
+    <button data-emote="😂">😂</button>
+    <button data-emote="🤔">🤔</button>
+    <button data-emote="😭">😭</button>
+    <button data-emote="🎉">🎉</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- win/lose modal -->
+<div class="modal-backdrop hidden" id="modal">
+  <div class="modal-card">
+    <p class="modal-eyebrow" id="modal-eyebrow"></p>
+    <h2 class="modal-title" id="modal-title"></h2>
+    <p class="modal-body" id="modal-body"></p>
+    <div class="modal-actions">
+      <button class="ghost-btn" id="modal-close">close</button>
+      <button class="submit-btn" id="modal-again">play again</button>
+    </div>
+  </div>
+</div>
+
+<!-- tangle puzzle picker -->
+<div class="modal-backdrop hidden" id="picker-modal">
+  <div class="modal-card picker-card">
+    <p class="modal-eyebrow">tangle</p>
+    <h2 class="modal-title">the puzzle book</h2>
+    <p class="picker-legend">
+      <span><span class="dot solved"></span>solved</span>
+      <span><span class="dot played"></span>seen</span>
+      <span><span class="dot"></span>new</span>
+    </p>
+    <div class="picker-grid" id="picker-grid"></div>
+    <div class="modal-actions">
+      <button class="ghost-btn" id="picker-cancel">close</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop hidden" id="photo-modal">
+  <div class="modal-card">
+    <p class="modal-eyebrow">your photo</p>
+    <div class="modal-actions">
+      <button class="ghost-btn" id="photo-remove">remove</button>
+      <button class="submit-btn" id="photo-replace">replace</button>
+    </div>
+    <button class="switch-btn" id="photo-cancel">cancel</button>
+  </div>
+</div>
+
+<div class="modal-backdrop hidden" id="name-modal">
+  <div class="modal-card">
+    <p class="modal-eyebrow">change your name</p>
+    <input id="name-edit" class="room-input name-input" maxlength="14" spellcheck="false" />
+    <div class="modal-actions">
+      <button class="ghost-btn" id="name-cancel">cancel</button>
+      <button class="submit-btn" id="name-save">save</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop hidden" id="note-modal">
+  <div class="modal-card">
+    <p class="modal-eyebrow">for your favorite person</p>
+    <textarea id="note-text" class="note-text" maxlength="280" rows="4" placeholder="something sweet…"></textarea>
+    <div class="modal-actions">
+      <button class="ghost-btn" id="note-cancel">cancel</button>
+      <button class="submit-btn" id="note-save">pin it 💌</button>
+    </div>
+  </div>
+</div>
+
+<div class="float-layer" id="float-layer" aria-hidden="true"></div>
+
+<script src="config.js?v=1"></script>
+<script src="puzzles.js?v=1"></script>
+<script src="spectrums.js?v=1"></script>
+<script src="inklings.js?v=1"></script>
+<script type="module" src="app.js?v=1"></script>
+</body>
+</html>

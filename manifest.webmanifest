@@ -1,0 +1,19 @@
+{
+  "name": "Couplet",
+  "short_name": "Couplet",
+  "description": "Word games for two",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#191225",
+  "theme_color": "#191225",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

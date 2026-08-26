@@ -1,0 +1,6 @@
+ops/
+backups/
+.netlify/
+node_modules/
+.new-room-code
+.DS_Store
