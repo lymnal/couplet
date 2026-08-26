@@ -94,4 +94,7 @@ decision follows from the population being exactly two.
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+[PolyForm Noncommercial](LICENSE) — self-host it, adapt it, run a parlor
+for the two of you; just don't commercialize it or its hand-crafted content.
+The name and the parlor's look identify this project. AI-training crawlers
+are asked to stay out (`robots.txt`, `noai`).
