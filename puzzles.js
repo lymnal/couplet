@@ -35,8 +35,8 @@ window.TANGLE_PUZZLES = [
         words: ["VIOLET", "HAZEL", "SCARLET", "OLIVE"],
       },
       {
-        title: "NYC boroughs",
-        words: ["BRONX", "QUEENS", "BROOKLYN", "MANHATTAN"],
+        title: "Little Women sisters",
+        words: ["MEG", "JO", "BETH", "AMY"],
       },
       {
         title: "Cocktails",
@@ -70,7 +70,7 @@ window.TANGLE_PUZZLES = [
     groups: [
       { title: "Card games", words: ["HEARTS", "SPIT", "WAR", "RUMMY"] },
       {
-        title: "Central Park",
+        title: "In a city park",
         words: ["CAROUSEL", "RESERVOIR", "ZOO", "BOATHOUSE"],
       },
       { title: "___ song", words: ["LOVE", "SWAN", "THEME", "SIREN"] },
@@ -188,11 +188,11 @@ window.TANGLE_PUZZLES = [
   {
     groups: [
       {
-        title: "NYC street food",
-        words: ["PRETZEL", "HALAL", "TACO", "HOTDOG"],
+        title: "Street-cart food",
+        words: ["PRETZEL", "KEBAB", "TACO", "HOTDOG"],
       },
       { title: "At the diner", words: ["BOOTH", "COUNTER", "MUG", "SPECIAL"] },
-      { title: "___ Island", words: ["CONEY", "LONG", "STATEN", "RHODE"] },
+      { title: "___ Island", words: ["RHODE", "LONG", "EASTER", "DESERT"] },
       {
         title: "Words hiding LOVE",
         words: ["GLOVE", "CLOVER", "PLOVER", "LOVELY"],
@@ -202,16 +202,16 @@ window.TANGLE_PUZZLES = [
   {
     groups: [
       {
-        title: "Museums we've wandered",
-        words: ["MET", "DIA", "MAGAZZINO", "INTREPID"],
+        title: "___ gallery",
+        words: ["ART", "SHOOTING", "PEANUT", "ROGUES"],
       },
       {
-        title: "Riding Metro-___",
-        words: ["NORTH", "CARD", "POLITAN", "NOME"],
+        title: "Sketching tools",
+        words: ["CHARCOAL", "PASTEL", "INK", "GRAPHITE"],
       },
       {
-        title: "Central Park corners",
-        words: ["RAMBLE", "BETHESDA", "OBELISK", "CASTLE"],
+        title: "Colors on a palette",
+        words: ["OCHRE", "UMBER", "TEAL", "CORAL"],
       },
       {
         title: "Words hiding ART",
@@ -844,7 +844,7 @@ window.TANGLE_PUZZLES = [
         title: "Herbs in cocktails",
         words: ["MINT", "BASIL", "LAVENDER", "ROSEMARY"],
       },
-      { title: "Subway line letters", words: ["A", "C", "E", "F"] },
+      { title: "Vitamins", words: ["A", "C", "D", "E"] },
       {
         title: "Photography words",
         words: ["APERTURE", "EXPOSURE", "BOKEH", "SHUTTER"],
@@ -1152,8 +1152,8 @@ window.TANGLE_PUZZLES = [
   {
     groups: [
       {
-        title: "Metro-North stops-ish",
-        words: ["BEACON", "COLD SPRING", "GARRISON", "TARRYTOWN"],
+        title: "Road-trip stops",
+        words: ["DINER", "OVERLOOK", "GAS STATION", "FRUIT STAND"],
       },
       {
         title: "Museum wings",
@@ -1189,16 +1189,16 @@ window.TANGLE_PUZZLES = [
   {
     groups: [
       {
-        title: "Things at Dia Beacon",
-        words: ["INSTALLATION", "TURBINE", "MINIMALISM", "NATURAL LIGHT"],
+        title: "Picnic date kit",
+        words: ["BLANKET", "BAGUETTE", "GRAPES", "SPEAKER"],
       },
       {
-        title: "Train date kit",
-        words: ["WINDOW SEAT", "SHARED EARBUDS", "COFFEE", "CROSSWORD"],
+        title: "___ trail",
+        words: ["PAPER", "NATURE", "OREGON", "VAPOR"],
       },
       {
-        title: "Hudson words",
-        words: ["RIVER", "VALLEY", "PALISADES", "HIGHLANDS"],
+        title: "Slow afternoon verbs",
+        words: ["MEANDER", "BROWSE", "DAWDLE", "SAUNTER"],
       },
       {
         title: "Gallery reactions",
@@ -1294,7 +1294,7 @@ window.TANGLE_PUZZLES = [
         words: ["FAN SHRINE", "COLD SHOWER", "FREEZER AISLE", "BLINDS DOWN"],
       },
       {
-        title: "Stoop life",
+        title: "Porch life",
         words: ["WAVE", "ICED COFFEE", "PEOPLE WATCH", "NEIGHBOR CAT"],
       },
       {

@@ -7,7 +7,7 @@ window.INKLINGS_DECK = [
   "What would @S order at 2am, no judgment?",
   "What's @S's death-row last meal?",
   "Which food does @S steal off @P's plate every time?",
-  "What's @S's bodega order?",
+  "What's @S's road-trip gas-station haul?",
   "What pizza topping would @S defend in court?",
   "What's @S's comfort takeout when the day was bad?",
   "What's @S's ideal breakfast?",
