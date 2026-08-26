@@ -391,7 +391,7 @@ test("duetShareCard renders spoiler-free grid with couple framing", () => {
   );
   assert.ok(card.includes("in 2, together"));
   assert.ok(card.includes("streak 12"));
-  assert.ok(card.includes("⬛🟨⬛⬛🟩\n🟩🟩🟩🟩🟩"));
+  assert.ok(card.includes("🖤💛🖤🖤💚\n💚💚💚💚💚"));
   assert.ok(card.includes("https://example.test/"));
   assert.ok(!card.match(/[A-Z]{5}/)); // never leaks the answer
 });
@@ -404,7 +404,7 @@ test("tangleShareCard renders solve order in the connections palette", () => {
   const card = tangleShareCard([3, 0, 1, 2], 0, 85, "u");
   assert.ok(card.startsWith("Couplet Tangle #85"));
   assert.ok(card.includes("not a single miss"));
-  assert.ok(card.includes("🟪🟪🟪🟪\n🟨🟨🟨🟨\n🟩🟩🟩🟩\n🟦🟦🟦🟦"));
+  assert.ok(card.includes("💜💜💜💜\n💛💛💛💛\n💚💚💚💚\n💙💙💙💙"));
   assert.ok(tangleShareCard([0], 1, 1, "u").includes("1 miss ♥"));
   assert.ok(tangleShareCard([0], 2, 1, "u").includes("2 misses"));
 });

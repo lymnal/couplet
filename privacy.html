@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>What Couplet stores</title>
+<meta name="theme-color" content="#191225" />
+<link rel="icon" href="favicon.svg" type="image/svg+xml" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,300..900&family=Rubik:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root { --ink:#191225; --ink-2:#241a33; --linen:#f6efe3; --dim:#b9aecb; --mint:#6ee7b7; --line:#40325c; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--ink); color:var(--linen);
+         font:16px/1.65 Rubik, system-ui, sans-serif; padding:3rem 1.25rem 5rem; }
+  main { max-width: 40rem; margin: 0 auto; }
+  h1 { font-family:Fraunces, Georgia, serif; font-style:italic; font-weight:640;
+       font-size:2.1rem; margin:0 0 .3rem; color:var(--mint); }
+  .sub { color:var(--dim); margin:0 0 2.5rem; }
+  h2 { font-size:1.05rem; margin:2.2rem 0 .6rem; }
+  p, li { color:#e6dfd2; }
+  a { color:var(--mint); }
+  ul { padding-left:1.1rem; }
+  li { margin:.35rem 0; }
+  .card { background:var(--ink-2); border:1px solid var(--line); border-radius:14px;
+          padding:1rem 1.25rem; margin:1.5rem 0; }
+  .back { display:inline-block; margin-top:2.5rem; color:var(--dim); }
+  strong { color:#fff; }
+</style>
+</head>
+<body>
+<main>
+  <h1>What Couplet stores</h1>
+  <p class="sub">The short version: your parlor code is the only key, and there is no account attached to any of it.</p>
+
+  <h2>What's kept</h2>
+  <p>Whatever the two of you put in: the names you typed, your game progress and streaks,
+  your Four Things entries, your Inklings answers, the notes on the wall, and the photo
+  if you added one. All of it is stored under your parlor code and nothing else.</p>
+
+  <h2>What isn't</h2>
+  <ul>
+    <li><strong>No accounts.</strong> No email, no password, no sign-up — there's nothing to sign up for.</li>
+    <li><strong>No analytics, trackers, ads, or cookies.</strong> Nobody is measuring you.</li>
+    <li><strong>Nothing is sold or shared.</strong> There is no one to sell it to.</li>
+  </ul>
+
+  <div class="card">
+    <h2 style="margin-top:0">The honest part about the code</h2>
+    <p>Your parlor code works like a key under the mat: <strong>anyone who has it can read
+    and change everything in your parlor</strong> — the notes, the photo, all of it. That's the
+    trade for having no accounts. Treat it like a password: send it to your person and
+    nobody else, and be careful screenshotting a screen with the code showing at the top.</p>
+    <p style="margin-bottom:0">If a code gets out, the fix is to start a fresh parlor
+    with a new code. Everything you make there is separate.</p>
+  </div>
+
+  <h2>Who can see it</h2>
+  <p>Whoever has the code. Also, unavoidably, the database host
+  (<a href="https://supabase.com/privacy" target="_blank" rel="noopener">Supabase</a>) and the
+  static host (<a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener">GitHub Pages</a>),
+  who keep ordinary server logs. The person who built Couplet can technically reach the
+  database, and doesn't go looking. Fonts are loaded from Google Fonts.</p>
+
+  <h2>Deleting it</h2>
+  <p>In your parlor, scroll to the bottom and choose <strong>delete parlor</strong>. It asks you
+  to type the code, then erases everything for both of you, immediately and permanently.
+  There is no backup to restore from and no undo. You can also remove a single note or the
+  photo without deleting the rest.</p>
+
+  <h2>Children</h2>
+  <p>Couplet isn't intended for anyone under 13.</p>
+
+  <h2>If this changes</h2>
+  <p>Couplet is a small project made for two people at a time, not a company. If any of the
+  above changes, this page changes with it — it lives in the
+  <a href="https://github.com/lymnal/couplet" target="_blank" rel="noopener">open source repository</a>,
+  so its history is public. Questions or a takedown request can be raised as an issue there.</p>
+
+  <a class="back" href="./">← back to the parlor</a>
+</main>
+</body>
+</html>

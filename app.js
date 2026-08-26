@@ -23,7 +23,7 @@ import {
   pickAttuneSpectrums,
   inkDealPool,
   duetStreakAfterWin,
-} from "./lib.js?v=4";
+} from "./lib.js?v=5";
 
 const CFG = window.COUPLET_CONFIG;
 /* vendored UMD build (vendor/supabase.js, pinned 2.112.4) — a CDN module
@@ -32,7 +32,7 @@ const CFG = window.COUPLET_CONFIG;
 const { createClient } = window.supabase;
 const PUZZLES = window.TANGLE_PUZZLES;
 /* asset version — ./bump.sh keeps this in step with index.html and sw.js */
-const ASSET_VERSION = "4";
+const ASSET_VERSION = "5";
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => [...document.querySelectorAll(sel)];
 
@@ -302,6 +302,13 @@ function joinChannel() {
       if (now - lastHiReply < 1200) return;
       lastHiReply = now;
       broadcast("state", { state });
+    })
+    /* the other phone erased the parlor — don't sit on a screen full of
+       things that no longer exist, and don't let connect() helpfully
+       re-create the room from this device's stale copy */
+    .on("broadcast", { event: "gone" }, () => {
+      forgetParlorLocally();
+      location.href = location.pathname;
     })
     .on("broadcast", { event: "typing" }, ({ payload }) => {
       if (payload.from !== me.slot) {
@@ -2173,6 +2180,36 @@ function wire() {
     location.href = location.pathname;
   });
 
+  /* The only irreversible thing in the app, and it erases two people's
+     memories, not one. So it asks for the code by hand — the friction is the
+     feature — and says out loud that the other person isn't consulted. */
+  $("#delete-btn").addEventListener("click", () => {
+    $("#delete-confirm").value = "";
+    $("#delete-go").disabled = true;
+    $("#delete-modal").classList.remove("hidden");
+  });
+  $("#delete-cancel").addEventListener("click", () =>
+    $("#delete-modal").classList.add("hidden"),
+  );
+  $("#delete-confirm").addEventListener("input", (e) => {
+    $("#delete-go").disabled =
+      e.target.value.trim().toUpperCase() !== (room ?? "").toUpperCase();
+  });
+  $("#delete-go").addEventListener("click", async () => {
+    $("#delete-go").disabled = true;
+    try {
+      const { error } = await supa.rpc("delete_room", { p_code: room });
+      if (error) throw error;
+    } catch (err) {
+      reportError("delete", err);
+      toast("couldn't delete — check your signal and try again");
+      return;
+    }
+    broadcast("gone", {});
+    forgetParlorLocally();
+    location.href = location.pathname;
+  });
+
   $("#modal-close").addEventListener("click", closeModal);
   /* the brag is the invitation: a spoiler-free grid the group chat already
      knows how to read, with the door to the parlor riding along */
@@ -2248,6 +2285,18 @@ function reportOk() {
   netDown = false;
   document.body.dataset.net = "ok";
   renderPresence();
+}
+
+/* Wipe every trace of this parlor from this device. Used both by the person
+   who deletes it and by their partner's phone when the "gone" ping lands. */
+function forgetParlorLocally() {
+  try {
+    if (room) localStorage.removeItem("couplet_deck::" + room);
+    for (const k of ["couplet_room", "couplet_slot", "couplet_name", "couplet_queue"])
+      localStorage.removeItem(k);
+  } catch {
+    /* private mode — nothing was stored to begin with */
+  }
 }
 
 const QUEUE_KEY = "couplet_queue";

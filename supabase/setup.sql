@@ -38,6 +38,20 @@ alter table public.keepsakes enable row level security;
 revoke all on public.rooms, public.four_things, public.keepsakes
   from anon, authenticated;
 
+-- Codes are the primary key on every table, so an unbounded code is its own
+-- storage attack. The join screen already caps input at 24 characters.
+create or replace function public.assert_code(p_code text)
+returns text
+language plpgsql immutable
+as $$
+begin
+  if p_code is null or length(p_code) = 0 or length(p_code) > 24 then
+    raise exception 'invalid parlor code';
+  end if;
+  return upper(p_code);
+end;
+$$;
+
 create or replace function public.get_room(p_code text)
 returns jsonb
 language sql
@@ -48,15 +62,16 @@ as $$
 $$;
 
 create or replace function public.set_room(p_code text, p_state jsonb)
-returns void
-language sql
-security definer
-set search_path = public
-as $$
+returns void language plpgsql security definer set search_path = public as $$
+declare c text := assert_code(p_code);
+begin
+  if length(p_state::text) > 65536 then
+    raise exception 'room state too large: % bytes (max 65536)', length(p_state::text);
+  end if;
   insert into public.rooms (code, state, updated_at)
-  values (upper(p_code), p_state, now())
-  on conflict (code)
-  do update set state = excluded.state, updated_at = now();
+  values (c, p_state, now())
+  on conflict (code) do update set state = excluded.state, updated_at = now();
+end;
 $$;
 
 create or replace function public.get_four(p_code text)
@@ -72,16 +87,19 @@ $$;
 
 create or replace function public.save_four(
   p_code text, p_day date, p_slot text, p_items jsonb
-)
-returns void
-language sql
-security definer
-set search_path = public
-as $$
+) returns void language plpgsql security definer set search_path = public as $$
+declare c text := assert_code(p_code);
+begin
+  if length(p_items::text) > 4000 then
+    raise exception 'four things too large: % bytes (max 4000)', length(p_items::text);
+  end if;
+  if (select count(*) from public.four_things where code = c) > 5000 then
+    raise exception 'this parlor has too many entries';
+  end if;
   insert into public.four_things (code, day, slot, items)
-  values (upper(p_code), p_day, p_slot, p_items)
-  on conflict (code, day, slot)
-  do update set items = excluded.items;
+  values (c, p_day, p_slot, p_items)
+  on conflict (code, day, slot) do update set items = excluded.items;
+end;
 $$;
 
 create or replace function public.get_keepsake(p_code text, p_kind text)
@@ -94,18 +112,19 @@ as $$
   where code = upper(p_code) and kind = p_kind;
 $$;
 
-create or replace function public.set_keepsake(
-  p_code text, p_kind text, p_data text
-)
-returns void
-language sql
-security definer
-set search_path = public
-as $$
+create or replace function public.set_keepsake(p_code text, p_kind text, p_data text)
+returns void language plpgsql security definer set search_path = public as $$
+declare c text := assert_code(p_code);
+begin
+  -- photos arrive as base64 data URLs; the client downscales to well under this
+  if length(p_data) > 1200000 then
+    raise exception 'keepsake too large: % bytes (max 1200000)', length(p_data);
+  end if;
+  if length(p_kind) > 32 then raise exception 'invalid keepsake kind'; end if;
   insert into public.keepsakes (code, kind, data, updated_at)
-  values (upper(p_code), p_kind, p_data, now())
-  on conflict (code, kind)
-  do update set data = excluded.data, updated_at = now();
+  values (c, p_kind, p_data, now())
+  on conflict (code, kind) do update set data = excluded.data, updated_at = now();
+end;
 $$;
 
 create or replace function public.del_keepsake(p_code text, p_kind text)
@@ -149,16 +168,24 @@ create or replace function public.save_inkling(
   p_code text, p_day date, p_idx int,
   p_card int default null, p_subject text default null,
   p_truth text default null, p_guess text default null, p_match boolean default null
-) returns void
-language sql security definer set search_path = public as $$
+) returns void language plpgsql security definer set search_path = public as $$
+declare c text := assert_code(p_code);
+begin
+  if length(coalesce(p_truth, '')) > 500 or length(coalesce(p_guess, '')) > 500 then
+    raise exception 'inkling answer too long (max 500 characters)';
+  end if;
+  if (select count(*) from public.inklings where code = c) > 5000 then
+    raise exception 'this parlor has too many inklings';
+  end if;
   insert into public.inklings (code, day, idx, card, subject, truth, guess, match)
-  values (upper(p_code), p_day, p_idx, p_card, p_subject, p_truth, p_guess, p_match)
+  values (c, p_day, p_idx, p_card, p_subject, p_truth, p_guess, p_match)
   on conflict (code, day, idx) do update set
     card    = coalesce(inklings.card, excluded.card),
     subject = coalesce(inklings.subject, excluded.subject),
     truth   = coalesce(excluded.truth, inklings.truth),
     guess   = coalesce(excluded.guess, inklings.guess),
     match   = coalesce(excluded.match, inklings.match);
+end;
 $$;
 
 create or replace function public.get_inklings(p_code text)
@@ -201,11 +228,19 @@ revoke all on public.notes from anon, authenticated;
 
 create or replace function public.save_note(
   p_code text, p_id text, p_by text, p_name text, p_body text, p_at timestamptz
-) returns void
-language sql security definer set search_path = public as $$
+) returns void language plpgsql security definer set search_path = public as $$
+declare c text := assert_code(p_code);
+begin
+  if length(p_id) > 64 or length(coalesce(p_name, '')) > 40 then
+    raise exception 'invalid note';
+  end if;
+  if (select count(*) from public.notes where code = c) > 2000 then
+    raise exception 'this parlor''s wall is full';
+  end if;
   insert into public.notes (code, id, by, name, body, at)
-  values (upper(p_code), p_id, p_by, p_name, left(p_body, 500), coalesce(p_at, now()))
+  values (c, p_id, p_by, p_name, left(p_body, 500), coalesce(p_at, now()))
   on conflict (code, id) do nothing;
+end;
 $$;
 
 create or replace function public.get_notes(p_code text)
@@ -247,3 +282,22 @@ language sql security definer set search_path = public as $$
   select payload from public.decks where id = upper(p_id);
 $$;
 grant execute on function public.get_deck(text) to anon, authenticated;
+
+-- Erasure (added 2026-08-26): the app's "delete parlor" button. Knowing the
+-- code is the capability, same as reading it.
+-- Erase a parlor completely. Knowing the code is the capability, same as
+-- reading it — but this is the only irreversible one, so the app asks twice.
+create or replace function public.delete_room(p_code text)
+returns void language plpgsql security definer set search_path = public as $$
+declare c text := assert_code(p_code);
+begin
+  delete from public.four_things where code = c;
+  delete from public.inklings    where code = c;
+  delete from public.notes       where code = c;
+  delete from public.keepsakes   where code = c;
+  delete from public.rooms       where code = c;
+end;
+$$;
+
+grant execute on function public.delete_room(text) to anon, authenticated;
+revoke execute on function public.assert_code(text) from anon, authenticated;
