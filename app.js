@@ -502,6 +502,10 @@ function joinChannel() {
       if (status === "SUBSCRIBED") {
         clearTimeout(rejoinTimer);
         await ch.track({ slot: me.slot, name: me.name });
+        /* anything we wrote before the channel was up (our name, on a fresh
+           join) was broadcast into the void — send the doc now; the other
+           phone's last-write-wins decides whether it matters */
+        broadcast("state", { state });
         broadcast("hi", {});
       } else if (["CHANNEL_ERROR", "TIMED_OUT", "CLOSED"].includes(status)) {
         partnerHere = false;
