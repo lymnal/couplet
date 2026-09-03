@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="robots" content="noindex, follow, noai, noimageai" />
+<meta name="tdm-reservation" content="1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Couplet · request a deck</title>
+<meta name="theme-color" content="#191225" />
+<meta name="color-scheme" content="dark" />
+<link rel="icon" href="favicon.svg" type="image/svg+xml" />
+<style>
+@font-face {
+  font-family: "Fraunces"; font-style: italic; font-weight: 300 900; font-display: swap;
+  src: url("vendor/fonts/fraunces-italic-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Fraunces"; font-style: italic; font-weight: 300 900; font-display: swap;
+  src: url("vendor/fonts/fraunces-italic-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Fraunces"; font-style: normal; font-weight: 300 900; font-display: swap;
+  src: url("vendor/fonts/fraunces-normal-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Fraunces"; font-style: normal; font-weight: 300 900; font-display: swap;
+  src: url("vendor/fonts/fraunces-normal-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Rubik"; font-style: normal; font-weight: 400 700; font-display: swap;
+  src: url("vendor/fonts/rubik-normal-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Rubik"; font-style: normal; font-weight: 400 700; font-display: swap;
+  src: url("vendor/fonts/rubik-normal-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+:root { --ink:#191225; --ink-2:#241a33; --line:#40325c; --linen:#f6efe3; --dim:#b9aecb; --gold:#16794b; --aqua:#6ee7b7; --pale:#c3f3de; --danger:#e8697d; }
+* { box-sizing: border-box; margin: 0; }
+html, body { min-height: 100%; background: var(--ink); }
+body { color: var(--linen); font-family: "Rubik", system-ui, sans-serif; padding: max(16px, env(safe-area-inset-top)) 16px 48px;
+  background: radial-gradient(120% 55% at 50% -12%, rgba(22,121,75,.18), transparent 60%), var(--ink); }
+main { max-width: 520px; margin: 0 auto; }
+.wordmark { font-family: "Fraunces", serif; font-style: italic; font-weight: 640; font-size: 2rem; text-align: center; margin: 14px 0 4px;
+  background: linear-gradient(100deg, var(--gold) 10%, var(--linen) 45%, var(--aqua) 90%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.wordmark a { color: inherit; text-decoration: none; }
+h1 { font-family: "Fraunces", serif; font-style: italic; font-weight: 560; font-size: 1.7rem; text-align: center; margin: 18px 0 8px; }
+.lede { color: var(--dim); text-align: center; line-height: 1.55; font-size: .95rem; margin-bottom: 22px; }
+label { display: block; margin: 18px 0 6px; font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); }
+input, textarea { width: 100%; background: var(--ink-2); border: 1.5px solid var(--line); border-radius: 10px; color: var(--linen);
+  font: inherit; font-size: 1rem; padding: 12px 14px; outline: none; resize: vertical; }
+input:focus, textarea:focus { border-color: var(--aqua); }
+::placeholder { color: var(--dim); opacity: .55; }
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+button { display: block; width: 100%; margin-top: 26px; background: var(--aqua); color: var(--ink); border: 0; border-radius: 999px;
+  font: inherit; font-weight: 600; font-size: 1.05rem; padding: 15px; cursor: pointer; }
+button:disabled { opacity: .5; }
+.fine { color: var(--dim); font-size: .8rem; line-height: 1.55; margin-top: 16px; }
+.fine a { color: var(--dim); }
+.done { display: none; text-align: center; padding: 30px 10px; line-height: 1.6; }
+.done b { font-family: "Fraunces", serif; font-size: 1.4rem; letter-spacing: .08em; color: var(--pale); display: block; margin: 10px 0; }
+.err { color: var(--danger); text-align: center; margin-top: 14px; min-height: 1.4em; font-size: .9rem; }
+</style>
+</head>
+<body>
+<main>
+<p class="wordmark"><a href="./">Couplet</a></p>
+<h1>A deck written for the two of you</h1>
+<p class="lede">Tell me about you two and I'll write a set of puzzles, cards, and prompts that only makes sense in your parlor. Free for the first twenty. Written by hand, so give it a week or two.</p>
+
+<form id="form" autocomplete="off">
+  <label for="f-names">Your two names</label>
+  <input id="f-names" name="names" placeholder="Ana & Leo" maxlength="900" />
+  <label for="f-who">Who you are to each other</label>
+  <input id="f-who" name="who" placeholder="a couple · best friends · siblings · parent & kid · other" maxlength="900" />
+  <label for="f-met">How the two of you met, in a few lines</label>
+  <textarea id="f-met" name="met" rows="3" placeholder="" maxlength="900"></textarea>
+  <label for="f-places">Places that are yours — a street, a café, a city, a couch</label>
+  <textarea id="f-places" name="places" rows="3" placeholder="" maxlength="900"></textarea>
+  <label for="f-food">Food you have opinions about</label>
+  <textarea id="f-food" name="food" rows="3" placeholder="the ramen place, the good bagels, the pizza argument" maxlength="900"></textarea>
+  <label for="f-jokes">Inside jokes, nicknames, phrases only you two say</label>
+  <textarea id="f-jokes" name="jokes" rows="3" placeholder="the private dialect — this is the good stuff" maxlength="900"></textarea>
+  <label for="f-tolerate">Things one of you loves and the other tolerates</label>
+  <textarea id="f-tolerate" name="tolerate" rows="3" placeholder="" maxlength="900"></textarea>
+  <label for="f-avoid">Anything to keep out</label>
+  <textarea id="f-avoid" name="avoid" rows="3" placeholder="topics, people, exes, whatever shouldn't turn up in a puzzle" maxlength="900"></textarea>
+  <label for="f-contact">Where to send your token</label>
+  <input id="f-contact" name="contact" type="email" required placeholder="you@somewhere.com" maxlength="200" />
+  <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" />
+  <button id="send" type="submit">send it ♥</button>
+  <p class="err" id="err"></p>
+  <p class="fine">Your answers stay private — read by one person, deleted once the deck is delivered. Your email is used once, to send the claim token. Your parlor code is never asked for; you redeem the token yourself under <i>decks</i> in the parlor. <a href="privacy.html">What we store</a>.</p>
+</form>
+
+<div class="done" id="done">
+  Got it. Your request is
+  <b id="req-id"></b>
+  Keep that in case you need to ask about it. When the deck is ready, a claim token arrives at the address you gave — open your parlor, tap <i>decks</i>, paste it, and it's yours, for both of you.
+</div>
+</main>
+<script src="vendor/supabase.js"></script>
+<script src="config.js"></script>
+<script>
+(function () {
+  const cfg = window.COUPLET_CONFIG;
+  const form = document.getElementById("form"), err = document.getElementById("err");
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    err.textContent = "";
+    const data = new FormData(form);
+    if (data.get("website")) return; /* honeypot */
+    const answers = {};
+    for (const [k, v] of data.entries()) if (k !== "contact" && k !== "website" && String(v).trim()) answers[k] = String(v).trim();
+    if (!answers.names || (!answers.jokes && !answers.met && !answers.places)) {
+      err.textContent = "give me at least your names and one thing that's yours";
+      return;
+    }
+    const btn = document.getElementById("send");
+    btn.disabled = true;
+    try {
+      const supa = supabase.createClient(cfg.supabaseUrl, cfg.supabaseKey);
+      const { data: id, error } = await supa.rpc("request_deck", { p_answers: answers, p_contact: String(data.get("contact")).trim() });
+      if (error) throw error;
+      form.style.display = "none";
+      document.getElementById("req-id").textContent = id;
+      document.getElementById("done").style.display = "block";
+      window.scrollTo(0, 0);
+    } catch (ex) {
+      err.textContent = (ex && ex.message) || "couldn't send — check your signal and try again";
+      btn.disabled = false;
+    }
+  });
+})();
+</script>
+</body>
+</html>

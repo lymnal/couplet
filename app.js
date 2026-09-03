@@ -38,7 +38,7 @@ import {
   pickAttuneSpectrums,
   inkDealPool,
   duetStreakAfterWin,
-} from "./lib.js?v=14";
+} from "./lib.js?v=15";
 
 const CFG = window.COUPLET_CONFIG;
 /* vendored UMD build (vendor/supabase.js, pinned 2.112.4) — a CDN module
@@ -47,7 +47,7 @@ const CFG = window.COUPLET_CONFIG;
 const { createClient } = window.supabase;
 const PUZZLES = window.TANGLE_PUZZLES;
 /* asset version — ./bump.sh keeps this in step with index.html and sw.js */
-const ASSET_VERSION = "14";
+const ASSET_VERSION = "15";
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => [...document.querySelectorAll(sel)];
 
@@ -403,6 +403,8 @@ function joinChannel() {
     /* the other phone erased the parlor — don't sit on a screen full of
        things that no longer exist, and don't let connect() helpfully
        re-create the room from this device's stale copy */
+    /* the other phone redeemed a deck — pick it up without a reload */
+    .on("broadcast", { event: "deck" }, () => refreshDeck())
     .on("broadcast", { event: "gone" }, () => {
       forgetParlorLocally();
       location.href = location.pathname;
@@ -2022,6 +2024,41 @@ function exportBook() {
   toast("saved — the book of nights ✦");
 }
 
+/* ---------------- decks: redeem a claim token ----------------
+ * A token binds a deck to this parlor from this phone, so nobody ever has
+ * to hand their parlor code to whoever wrote the deck. */
+function openDecks() {
+  $("#decks-status").textContent = activeDeckId
+    ? `this parlor plays deck ${activeDeckId}`
+    : "this parlor plays the original set";
+  $("#deck-token").value = "";
+  $("#decks-modal").classList.remove("hidden");
+  $("#deck-token").focus();
+}
+async function redeemDeck() {
+  const token = $("#deck-token").value.trim();
+  if (!token) return toast("paste the token first");
+  const btn = $("#deck-redeem");
+  btn.disabled = true;
+  try {
+    const { data, error } = await supa.rpc("claim_deck", {
+      p_code: room,
+      p_token: token,
+    });
+    if (error) throw error;
+    activeDeckId = null; /* so refreshDeck fetches the new one */
+    await refreshDeck();
+    broadcast("deck", {});
+    $("#decks-modal").classList.add("hidden");
+    toast(`deck ${data} is yours now ✦`);
+  } catch (e) {
+    reportError("claim", e);
+    toast(e?.message || "couldn't redeem that — check your signal");
+  } finally {
+    btn.disabled = false;
+  }
+}
+
 /* ---------------- TANGLE ---------------- */
 let tangleSel = new Set();
 let tangleSelBy = null;
@@ -2569,6 +2606,14 @@ function wire() {
   });
   $("#duet-book-btn").addEventListener("click", openWordBook);
   $("#review-btn").addEventListener("click", openReview);
+  $("#decks-btn").addEventListener("click", openDecks);
+  $("#decks-cancel").addEventListener("click", () =>
+    $("#decks-modal").classList.add("hidden"),
+  );
+  $("#deck-redeem").addEventListener("click", redeemDeck);
+  $("#deck-token").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") redeemDeck();
+  });
   $("#review-cancel").addEventListener("click", () =>
     $("#review-modal").classList.add("hidden"),
   );
@@ -2645,6 +2690,7 @@ function wire() {
     "words-modal": "#words-cancel",
     "invite-modal": "#invite-cancel",
     "review-modal": "#review-cancel",
+    "decks-modal": "#decks-cancel",
   };
   document.addEventListener("keydown", (e) => {
     if (e.key !== "Escape") return;

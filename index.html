@@ -31,7 +31,7 @@
 <link rel="icon" href="favicon.svg" type="image/svg+xml" />
 <link rel="apple-touch-icon" href="apple-touch-icon.png" />
 <link rel="manifest" href="manifest.webmanifest" />
-<link rel="stylesheet" href="style.css?v=14" />
+<link rel="stylesheet" href="style.css?v=15" />
 </head>
 <body>
 <div class="vignette" aria-hidden="true"></div>
@@ -185,6 +185,8 @@
     </div>
     <div class="footer-links">
       <button class="switch-btn" id="review-btn">in review ✦</button>
+      <span class="footer-dot">·</span>
+      <button class="switch-btn" id="decks-btn">decks</button>
       <span class="footer-dot">·</span>
       <button class="switch-btn" id="rename-btn">change name</button>
       <span class="footer-dot">·</span>
@@ -379,6 +381,22 @@
   </div>
 </div>
 
+<!-- decks: redeem a claim token, or ask for a personalized one -->
+<div class="modal-backdrop hidden" id="decks-modal" role="dialog" aria-modal="true" aria-labelledby="decks-title">
+  <div class="modal-card">
+    <p class="modal-eyebrow">decks</p>
+    <h2 class="modal-title" id="decks-title">your content</h2>
+    <p class="modal-body" id="decks-status"></p>
+    <p class="modal-body">Have a claim token? Paste it here — it binds the deck to this parlor for you both.</p>
+    <input id="deck-token" class="room-input deck-token" maxlength="40" autocomplete="off" spellcheck="false" placeholder="XXXX-XXXX-XXXX" aria-label="claim token" />
+    <div class="modal-actions">
+      <button class="ghost-btn" id="decks-cancel">close</button>
+      <button class="submit-btn" id="deck-redeem">redeem</button>
+    </div>
+    <p class="modal-body decks-ask">Want one written for the two of you? <a href="deck-request.html" target="_blank" rel="noopener">Request a personalized deck →</a></p>
+  </div>
+</div>
+
 <!-- the parlor, in review -->
 <div class="modal-backdrop hidden" id="review-modal" role="dialog" aria-modal="true" aria-labelledby="review-title">
   <div class="modal-card picker-card">
@@ -460,12 +478,12 @@
 
 <div class="float-layer" id="float-layer" aria-hidden="true"></div>
 
-<script src="vendor/supabase.js?v=14"></script>
-<script src="vendor/qrcode.js?v=14"></script>
-<script src="config.js?v=14"></script>
-<script src="puzzles.js?v=14"></script>
-<script src="spectrums.js?v=14"></script>
-<script src="inklings.js?v=14"></script>
-<script type="module" src="app.js?v=14"></script>
+<script src="vendor/supabase.js?v=15"></script>
+<script src="vendor/qrcode.js?v=15"></script>
+<script src="config.js?v=15"></script>
+<script src="puzzles.js?v=15"></script>
+<script src="spectrums.js?v=15"></script>
+<script src="inklings.js?v=15"></script>
+<script type="module" src="app.js?v=15"></script>
 </body>
 </html>

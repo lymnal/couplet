@@ -61,3 +61,15 @@ insert into keepsakes (code, kind, data) values ('YOURROOM1', 'deck', 'YOURDECK1
 
 Unbind a parlor by deleting its `deck` keepsake. There is intentionally no
 public write path for decks — the publishable key can only *read* them.
+
+## Claim tokens (self-hosters)
+
+Binding a deck by writing the parlor's keepsake directly means the deck's author
+has the parlor code, which is the parlor's only key. Prefer a **claim token**:
+insert a row into `deck_claims` (`token`, `deck_id`, `uses`) and hand the token
+to the couple; they paste it under *decks* in the parlor and `claim_deck` binds
+it from their own phone. The admin tool does the minting:
+`node ops/make-deck.mjs claim DECKID [uses]`. Requests from the site's
+questionnaire land in `deck_requests` (`make-deck.mjs requests | show | done`).
+Both tables are deny-all; the only public paths are `claim_deck` and
+`request_deck`, both capped.

@@ -340,6 +340,81 @@ language sql security definer set search_path = public as $$
 $$;
 grant execute on function public.get_deck(text) to anon, authenticated;
 
+-- Deck claims and deck requests (added 2026-09-03).
+-- A claim token lets a parlor bind a deck itself, without handing anyone its
+-- code. Tokens are minted by the admin tool; there is still no public write
+-- path for deck content. A request is the questionnaire from the site, read
+-- by the admin tool and deleted once the deck is delivered.
+create table if not exists public.deck_claims (
+  token      text primary key,
+  deck_id    text not null references public.decks(id),
+  uses       int  not null default 1,
+  used       int  not null default 0,
+  created_at timestamptz not null default now()
+);
+alter table public.deck_claims enable row level security;
+revoke all on public.deck_claims from anon, authenticated;
+
+create or replace function public.claim_deck(p_code text, p_token text)
+returns text language plpgsql security definer set search_path = public as $$
+declare
+  c text := assert_code(p_code);
+  t text := upper(regexp_replace(coalesce(p_token, ''), '[^A-Za-z0-9]', '', 'g'));
+  cl record;
+begin
+  if length(t) < 8 or length(t) > 32 then
+    raise exception 'that token doesn''t look right';
+  end if;
+  if not exists (select 1 from public.rooms where code = c) then
+    raise exception 'open the parlor first, then redeem';
+  end if;
+  select * into cl from public.deck_claims where token = t for update;
+  if not found or cl.used >= cl.uses then
+    raise exception 'that token has been used already, or never existed';
+  end if;
+  update public.deck_claims set used = used + 1 where token = t;
+  insert into public.keepsakes (code, kind, data, updated_at)
+  values (c, 'deck', cl.deck_id, now())
+  on conflict (code, kind) do update set data = excluded.data, updated_at = now();
+  return cl.deck_id;
+end;
+$$;
+grant execute on function public.claim_deck(text, text) to anon, authenticated;
+
+create table if not exists public.deck_requests (
+  id           text primary key,
+  answers      jsonb not null,
+  contact      text,
+  created_at   timestamptz not null default now(),
+  fulfilled_at timestamptz
+);
+alter table public.deck_requests enable row level security;
+revoke all on public.deck_requests from anon, authenticated;
+
+create or replace function public.request_deck(p_answers jsonb, p_contact text)
+returns text language plpgsql security definer set search_path = public as $$
+declare
+  new_id text := upper(substr(md5(random()::text || clock_timestamp()::text), 1, 10));
+begin
+  if p_answers is null or jsonb_typeof(p_answers) <> 'object' then
+    raise exception 'answers must be an object';
+  end if;
+  if length(p_answers::text) > 8000 then
+    raise exception 'that''s more than the form can hold (8000 characters)';
+  end if;
+  if length(coalesce(p_contact, '')) > 200 then
+    raise exception 'contact too long';
+  end if;
+  if (select count(*) from public.deck_requests where created_at > now() - interval '1 day') >= 50 then
+    raise exception 'the request book is full for today — try again tomorrow';
+  end if;
+  perform public.assert_budget();
+  insert into public.deck_requests (id, answers, contact) values (new_id, p_answers, p_contact);
+  return new_id;
+end;
+$$;
+grant execute on function public.request_deck(jsonb, text) to anon, authenticated;
+
 -- Erasure (added 2026-08-26): the app's "delete parlor" button. Knowing the
 -- code is the capability, same as reading it.
 -- Erase a parlor completely. Knowing the code is the capability, same as

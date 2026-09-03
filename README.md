@@ -37,7 +37,8 @@ The default content is written for any two people anywhere. But a parlor can
 carry a **personalized deck** — Tangle puzzles about your city, Inklings cards
 about your cat, prompts in your private dialect, your own Duet answers. A
 deck replaces any of the five content sets for that parlor alone; whatever it
-leaves out falls back to the defaults. [Request one](https://github.com/lymnal/couplet/issues/new?template=deck-request.yml),
+leaves out falls back to the defaults. [Request one](https://lymnal.github.io/couplet/deck-request.html) — free for the
+first twenty — and redeem the claim token under *decks* in your parlor,
 or make your own — the format, the rules, and the self-hosting SQL live in
 [decks/](decks/README.md).
 

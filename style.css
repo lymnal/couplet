@@ -824,3 +824,8 @@ button, .key, .word-tile { touch-action: manipulation; }
 .review-tile span { display: block; margin-top: 4px; font-size: 0.66rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--linen-dim); }
 .review-lines { color: var(--linen-dim); font-size: 0.86rem; line-height: 1.55; }
 .review-actions { flex-wrap: wrap; gap: 8px; }
+
+/* ============ decks: redeem ============ */
+.deck-token { width: 100%; margin-top: 12px; font-size: 1.05rem; letter-spacing: 0.12em; }
+.decks-ask { margin-top: 18px; font-size: 0.85rem; }
+.decks-ask a { color: var(--aqua-pale); }
