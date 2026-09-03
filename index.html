@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Couplet · word games for two</title>
 <meta name="description" content="Five word games for exactly two people. Open the link, send it to your person, play — no accounts, no feed, no downloads." />
 <meta name="theme-color" content="#191225" />
@@ -109,7 +109,7 @@
     <h1 class="wordmark wordmark-sm">Couplet</h1>
     <p class="presence-line" data-presenceline>&nbsp;</p>
 
-    <div class="photo-frame hidden" id="photo-frame">
+    <div class="photo-frame hidden" id="photo-frame" role="button" tabindex="0" aria-label="your photo — open to replace or remove it">
       <img id="photo-img" alt="the two of you" />
     </div>
     <button class="note-btn photo-add hidden" id="photo-add">📷 add a photo of us</button>
@@ -230,7 +230,7 @@
     <p class="presence-line presence-line-sm" data-presenceline>&nbsp;</p>
     <div class="tangle-status">
       <button id="tangle-puzzle-tag" class="mode-tag mode-tag-btn" title="browse the puzzle book">puzzle 1 ▾</button>
-      <span class="hearts" id="tangle-hearts" title="tries left"></span>
+      <span class="hearts" id="tangle-hearts" role="img" title="tries left"></span>
     </div>
 
     <div class="solved-bands" id="solved-bands"></div>
@@ -313,7 +313,7 @@
 <!-- emote fab -->
 <div class="emote-fab hidden" id="emote-fab">
   <button class="emote-toggle" id="emote-toggle" aria-label="send your partner a little reaction">♥</button>
-  <div class="emote-tray" id="emote-tray">
+  <div class="emote-tray" id="emote-tray" role="group" aria-label="reactions">
     <button data-emote="❤️">❤️</button>
     <button data-emote="😘">😘</button>
     <button data-emote="😂">😂</button>
@@ -323,10 +323,10 @@
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <!-- win/lose modal -->
-<div class="modal-backdrop hidden" id="modal">
+<div class="modal-backdrop hidden" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
   <div class="modal-card">
     <p class="modal-eyebrow" id="modal-eyebrow"></p>
     <h2 class="modal-title" id="modal-title"></h2>
@@ -340,10 +340,10 @@
 </div>
 
 <!-- tangle puzzle picker -->
-<div class="modal-backdrop hidden" id="picker-modal">
+<div class="modal-backdrop hidden" id="picker-modal" role="dialog" aria-modal="true" aria-labelledby="picker-title">
   <div class="modal-card picker-card">
     <p class="modal-eyebrow">tangle</p>
-    <h2 class="modal-title">the puzzle book</h2>
+    <h2 class="modal-title" id="picker-title">the puzzle book</h2>
     <p class="picker-legend">
       <span><span class="dot solved"></span>solved</span>
       <span><span class="dot played"></span>seen</span>
@@ -356,7 +356,7 @@
   </div>
 </div>
 
-<div class="modal-backdrop hidden" id="photo-modal">
+<div class="modal-backdrop hidden" id="photo-modal" role="dialog" aria-modal="true" aria-label="your photo">
   <div class="modal-card">
     <p class="modal-eyebrow">your photo</p>
     <div class="modal-actions">
@@ -367,7 +367,7 @@
   </div>
 </div>
 
-<div class="modal-backdrop hidden" id="name-modal">
+<div class="modal-backdrop hidden" id="name-modal" role="dialog" aria-modal="true" aria-label="change your name">
   <div class="modal-card">
     <p class="modal-eyebrow">change your name</p>
     <input id="name-edit" class="room-input name-input" maxlength="14" spellcheck="false" />
@@ -378,7 +378,7 @@
   </div>
 </div>
 
-<div class="modal-backdrop hidden" id="delete-modal">
+<div class="modal-backdrop hidden" id="delete-modal" role="dialog" aria-modal="true" aria-label="delete this parlor">
   <div class="modal-card">
     <p class="modal-eyebrow">delete this parlor</p>
     <p class="modal-body">This erases everything, for <b>both</b> of you — every note,
@@ -393,7 +393,7 @@
   </div>
 </div>
 
-<div class="modal-backdrop hidden" id="note-modal">
+<div class="modal-backdrop hidden" id="note-modal" role="dialog" aria-modal="true" aria-label="leave a note">
   <div class="modal-card">
     <p class="modal-eyebrow">for your favorite person</p>
     <textarea id="note-text" class="note-text" maxlength="280" rows="4" placeholder="something sweet…"></textarea>

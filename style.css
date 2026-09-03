@@ -753,3 +753,7 @@ button, .key, .word-tile { touch-action: manipulation; }
   from { opacity: 0; transform: translateY(10px) scale(0.955); }
 }
 /* ======================================= */
+
+/* keyboard users get the same affordances the thumb does */
+.photo-frame:focus-visible,
+.dial-wrap svg:focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; border-radius: 12px; }

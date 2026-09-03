@@ -548,6 +548,8 @@ function renderPresence() {
     const label = s === me.slot ? me.name : state.players?.[s];
     orb.textContent = label?.[0]?.toUpperCase() ?? "";
     orb.title = s === me.slot ? `${label} (you)` : (label ?? "waiting…");
+    orb.setAttribute("role", "img");
+    orb.setAttribute("aria-label", orb.title);
   });
   const line = netDown
     ? `you're ${me.name} ✦ offline — your play is saved here ⌁`
@@ -880,6 +882,21 @@ function buildDial(showTarget, target, interactive) {
   wrap.appendChild(svg);
   setNeedle(dialPos);
   if (interactive) {
+    /* the needle answers arrow keys too — shift for bigger steps */
+    svg.setAttribute("tabindex", "0");
+    svg.setAttribute("role", "slider");
+    svg.setAttribute("aria-label", "the dial — arrow keys move the needle");
+    svg.setAttribute("aria-valuemin", "0");
+    svg.setAttribute("aria-valuemax", "100");
+    svg.addEventListener("keydown", (ev) => {
+      const step = ev.shiftKey ? 10 : 2;
+      if (ev.key === "ArrowLeft" || ev.key === "ArrowDown")
+        setDial(Math.max(0, dialPos - step));
+      else if (ev.key === "ArrowRight" || ev.key === "ArrowUp")
+        setDial(Math.min(100, dialPos + step));
+      else return;
+      ev.preventDefault();
+    });
     const onPoint = (ev) => {
       const rect = svg.getBoundingClientRect();
       const x = ((ev.clientX - rect.left) / rect.width) * 200;
@@ -913,6 +930,7 @@ function setNeedle(p) {
   const [x, y] = polar(100, 100, 66, posToDeg(p));
   needle.setAttribute("x2", x.toFixed(1));
   needle.setAttribute("y2", y.toFixed(1));
+  needle.closest("svg")?.setAttribute("aria-valuenow", String(Math.round(p)));
   knob?.setAttribute("cx", x.toFixed(1));
   knob?.setAttribute("cy", y.toFixed(1));
 }
@@ -1019,6 +1037,7 @@ function renderAttune() {
       input.className = "clue-input";
       input.maxLength = 40;
       input.placeholder = "your clue — a word or short phrase";
+      input.setAttribute("aria-label", "your clue");
       const btn = document.createElement("button");
       btn.className = "submit-btn";
       btn.textContent = "send the clue";
@@ -1340,6 +1359,7 @@ function composeCard(prefill) {
     inp.className = "four-input";
     inp.maxLength = 140;
     inp.placeholder = hints[i];
+    inp.setAttribute("aria-label", `thing ${i + 1} — ${hints[i]}`);
     if (prefill?.[i]) inp.value = prefill[i];
     row.append(num, inp);
     card.appendChild(row);
@@ -1497,6 +1517,11 @@ function ensureDuet() {
     });
   }
 }
+/* what a screen reader says for a scored row */
+const SCORE_WORD = { g: "correct", y: "in the word", x: "not in the word" };
+const describeGuess = (w, score, by) =>
+  `${by} guessed ${w.toUpperCase()}: ` +
+  [...w].map((ch, i) => `${ch.toUpperCase()} ${SCORE_WORD[score[i]]}`).join(", ");
 function scoreGuess(guess, answer) {
   const res = Array(5).fill("x");
   const rem = {};
@@ -1586,6 +1611,8 @@ function renderDuet() {
       row.appendChild(tile);
     }
     if (g) {
+      row.setAttribute("role", "img");
+      row.setAttribute("aria-label", describeGuess(g.w, score, slotName(g.by)));
       const dot = document.createElement("span");
       dot.className = "row-author " + slotClass(g.by);
       rowWrap.appendChild(dot);
@@ -1669,6 +1696,7 @@ function renderKeyboard() {
         key.className = "key wide";
         key.textContent = "⌫";
         key.dataset.k = "back";
+        key.setAttribute("aria-label", "backspace");
       } else {
         key.className = "key";
         key.textContent = ch;
@@ -1677,6 +1705,8 @@ function renderKeyboard() {
         if (st === 2) key.classList.add("st-g");
         else if (st === 1) key.classList.add("st-y");
         else if (st === 0) key.classList.add("st-x");
+        if (st != null)
+          key.setAttribute("aria-label", `${ch}, ${SCORE_WORD[["x", "y", "g"][st]]}`);
       }
       row.appendChild(key);
     }
@@ -1797,6 +1827,10 @@ function renderTangle() {
   $("#tangle-hearts").innerHTML =
     "❤️".repeat(Math.max(0, 4 - t.mistakes)) +
     "🖤".repeat(Math.min(4, t.mistakes));
+  $("#tangle-hearts").setAttribute(
+    "aria-label",
+    `${Math.max(0, 4 - t.mistakes)} of 4 tries left`,
+  );
 
   const bands = $("#solved-bands");
   bands.innerHTML = "";
@@ -1826,6 +1860,7 @@ function renderTangle() {
       (w.length <= 6 ? "len-sm" : w.length <= 9 ? "len-md" : "len-lg");
     tileBtn.textContent = w;
     tileBtn.dataset.idx = flatIdx;
+    tileBtn.setAttribute("aria-pressed", String(tangleSel.has(flatIdx)));
     if (tangleSel.has(flatIdx)) {
       tileBtn.classList.add(
         tangleSelBy && tangleSelBy !== me.slot
@@ -2019,6 +2054,7 @@ function openModal(game, title, body, brag = null) {
   $("#modal-body").textContent = body;
   $("#modal-share").classList.toggle("hidden", !brag);
   $("#modal").classList.remove("hidden");
+  $("#modal-close").focus();
 }
 let modalBrag = null;
 function closeModal() {
@@ -2147,9 +2183,16 @@ function wire() {
   });
 
   $("#photo-add").addEventListener("click", () => $("#photo-file").click());
-  $("#photo-frame").addEventListener("click", () =>
-    $("#photo-modal").classList.remove("hidden"),
-  );
+  $("#photo-frame").addEventListener("click", () => {
+    $("#photo-modal").classList.remove("hidden");
+    $("#photo-cancel").focus();
+  });
+  $("#photo-frame").addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      $("#photo-frame").click();
+    }
+  });
   $("#photo-cancel").addEventListener("click", () =>
     $("#photo-modal").classList.add("hidden"),
   );
@@ -2276,6 +2319,7 @@ function wire() {
     $("#delete-confirm").value = "";
     $("#delete-go").disabled = true;
     $("#delete-modal").classList.remove("hidden");
+    $("#delete-confirm").focus();
   });
   $("#delete-cancel").addEventListener("click", () =>
     $("#delete-modal").classList.add("hidden"),
@@ -2299,6 +2343,24 @@ function wire() {
     location.href = location.pathname;
   });
 
+  /* Escape closes whichever sheet is open, through its own "leave it" button */
+  const dismissers = {
+    modal: "#modal-close",
+    "picker-modal": "#picker-cancel",
+    "photo-modal": "#photo-cancel",
+    "name-modal": "#name-cancel",
+    "delete-modal": "#delete-cancel",
+    "note-modal": "#note-cancel",
+  };
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    for (const [id, btn] of Object.entries(dismissers)) {
+      if ($("#" + id).classList.contains("hidden")) continue;
+      e.preventDefault();
+      $(btn).click();
+      return;
+    }
+  });
   $("#modal-close").addEventListener("click", closeModal);
   /* the brag is the invitation: a spoiler-free grid the group chat already
      knows how to read, with the door to the parlor riding along */
@@ -2716,6 +2778,7 @@ function renderInklings() {
       inp.placeholder = meIsSubject
         ? "the truth, in a few words"
         : "your best guess";
+      inp.setAttribute("aria-label", inp.placeholder);
       if (prevInput) inp.value = prevInput;
       const seal = document.createElement("button");
       seal.className = "submit-btn seal-btn";
