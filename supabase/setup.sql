@@ -438,10 +438,24 @@ grant execute on function public.free_decks_left() to anon, authenticated;
 -- code is the capability, same as reading it.
 -- Erase a parlor completely. Knowing the code is the capability, same as
 -- reading it — but this is the only irreversible one, so the app asks twice.
+-- Protected parlors (added 2026-09-03): a code is a bearer key, so a leaked
+-- code could erase a parlor. Rows here make delete_room refuse; only the
+-- operator can remove a protected parlor (or unprotect it). No public write.
+create table if not exists public.protected_rooms (
+  code       text primary key,
+  note       text,
+  created_at timestamptz not null default now()
+);
+alter table public.protected_rooms enable row level security;
+revoke all on public.protected_rooms from anon, authenticated, public;
+
 create or replace function public.delete_room(p_code text)
 returns void language plpgsql security definer set search_path = public as $$
 declare c text := assert_code(p_code);
 begin
+  if exists (select 1 from public.protected_rooms where code = c) then
+    raise exception 'this parlor is protected — it can only be removed by whoever runs the backend';
+  end if;
   delete from public.four_things where code = c;
   delete from public.inklings    where code = c;
   delete from public.notes       where code = c;
