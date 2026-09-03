@@ -111,7 +111,7 @@ decision follows from the population being exactly two.
 ## License
 
 [PolyForm Noncommercial](LICENSE) — self-host it, adapt it, run a parlor
-for the two of you; just don't commercialize it or its hand-crafted content.
+for the two of you; just don't commercialize it or its content.
 The name and the parlor's look identify this project. None of it is offered
 as AI training data: the license says so, text-and-data-mining rights are
 reserved machine-readably (`/.well-known/tdmrep.json`, `noai`, `ai.txt`), and
