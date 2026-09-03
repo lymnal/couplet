@@ -20,13 +20,19 @@ jobs:
           for f in app.js lib.js sw.js puzzles.js spectrums.js inklings.js config.js; do
             node --check "$f"
           done
-      - name: Version pins agree (index / app / sw)
+      - name: Version pins agree everywhere
         # bump.sh keeps these in step; CI fails if a hand edit drifts them,
         # because drift means the service worker caches one build while the
-        # page asks for another.
+        # page asks for another. Every ?v= in the page and the app (script
+        # tags AND the lib.js import) must be the one the worker serves.
         run: |
-          v_html=$(grep -o 'style.css?v=[0-9]*' index.html | head -1 | grep -o '[0-9]*$')
+          pins=$(grep -ohE '\?v=[0-9]+' index.html app.js | sort -u)
           v_sw=$(grep '^const ASSET_V = ' sw.js | grep -o '[0-9]*')
           v_app=$(grep '^const ASSET_VERSION = ' app.js | grep -o '[0-9]*')
-          echo "html=$v_html sw=$v_sw app=$v_app"
-          [ "$v_html" = "$v_sw" ] && [ "$v_html" = "$v_app" ]
+          echo "pins: $(echo $pins) | sw=$v_sw app=$v_app"
+          [ "$(echo "$pins" | wc -l)" -eq 1 ] && [ "$pins" = "?v=$v_sw" ] && [ "$v_sw" = "$v_app" ]
+      - name: Every shell asset the worker precaches exists
+        run: |
+          for u in $(grep -oE '"\./[^"?`]+' sw.js | tr -d '"' | sed 's#^\./##' | grep -v '^$'); do
+            [ -e "$u" ] || { echo "missing: $u"; exit 1; }
+          done
