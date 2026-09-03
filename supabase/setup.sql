@@ -451,4 +451,6 @@ end;
 $$;
 
 grant execute on function public.delete_room(text) to anon, authenticated;
-revoke execute on function public.assert_code(text) from anon, authenticated;
+-- Postgres grants EXECUTE to PUBLIC on every new function by default, so
+-- internal helpers must be revoked from PUBLIC too, not just from anon.
+revoke execute on function public.assert_code(text) from public, anon, authenticated;
