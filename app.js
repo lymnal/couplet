@@ -15,6 +15,9 @@ import {
   SCORE_WORD,
   relativeAgo,
   appendDuetLog,
+  parlorReview,
+  reviewShareCard,
+  bookOfNightsText,
   otherSlot,
   slotClass,
   hashStr,
@@ -35,7 +38,7 @@ import {
   pickAttuneSpectrums,
   inkDealPool,
   duetStreakAfterWin,
-} from "./lib.js?v=13";
+} from "./lib.js?v=14";
 
 const CFG = window.COUPLET_CONFIG;
 /* vendored UMD build (vendor/supabase.js, pinned 2.112.4) — a CDN module
@@ -44,7 +47,7 @@ const CFG = window.COUPLET_CONFIG;
 const { createClient } = window.supabase;
 const PUZZLES = window.TANGLE_PUZZLES;
 /* asset version — ./bump.sh keeps this in step with index.html and sw.js */
-const ASSET_VERSION = "13";
+const ASSET_VERSION = "14";
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => [...document.querySelectorAll(sel)];
 
@@ -1928,6 +1931,97 @@ function renderInviteQr(url) {
   }
 }
 
+/* ---------------- the parlor, in review ----------------
+ * The one thing a copy of this app can't have: what these two have built
+ * up. Counted from data already on the phone, so it works offline too. */
+function currentReview() {
+  return parlorReview({
+    ritual: ritualData,
+    inklings: inkRows,
+    notes: noteRows,
+    state,
+    today: todayKey(),
+  });
+}
+const niceDate = (d) =>
+  new Date(d + "T12:00:00").toLocaleDateString([], { month: "long", day: "numeric", year: "numeric" });
+function openReview() {
+  const r = currentReview();
+  $("#review-since").textContent = `your parlor · since ${niceDate(r.since)}`;
+  const grid = $("#review-grid");
+  grid.textContent = "";
+  const tiles = [
+    [r.nights, "nights of four things"],
+    [r.wordsGot, "words got together"],
+    [r.tangles, "tangles untangled"],
+    [r.inTune == null ? "—" : `${r.inTune}%`, "in tune"],
+    [r.known == null ? "—" : `${r.known}%`, "known"],
+    [r.notes, "little notes"],
+  ];
+  for (const [num, label] of tiles) {
+    const t = document.createElement("div");
+    t.className = "review-tile";
+    const b = document.createElement("b");
+    b.textContent = String(num);
+    const s = document.createElement("span");
+    s.textContent = label;
+    t.append(b, s);
+    grid.appendChild(t);
+  }
+  const lines = [];
+  if (r.longestStreak > 1) lines.push(`longest run: ${r.longestStreak} nights in a row`);
+  if (r.thingsWritten) lines.push(`${r.thingsWritten} good things written down`);
+  if (r.bestGuess) lines.push(`best Duet: got it in ${r.bestGuess}`);
+  if (r.tanglesPerfect) lines.push(`${r.tanglesPerfect} flawless tangle${r.tanglesPerfect === 1 ? "" : "s"}`);
+  if (r.cards) lines.push(`${r.cards} inkling${r.cards === 1 ? "" : "s"} answered`);
+  $("#review-lines").textContent = lines.length
+    ? lines.join(" · ")
+    : "nothing counted yet — play a little and come back";
+  $("#review-modal").classList.remove("hidden");
+  $("#review-cancel").focus();
+}
+
+/* Exports: a complete copy (JSON, everything the backend holds for this
+   parlor, decoded) and the book of nights as plain text. Both are built on
+   the phone from data already fetched — no new backend surface. */
+function downloadText(name, text, type) {
+  const blob = new Blob([text], { type });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+}
+function exportParlor() {
+  const bundle = {
+    app: "couplet",
+    version: ASSET_VERSION,
+    exported: new Date().toISOString(),
+    code: room,
+    players: state.players ?? {},
+    state,
+    fourThings: ritualData,
+    inklings: inkRows.map((r) => ({
+      ...r,
+      truth: r.truth ? inkPlain(r.truth) : r.truth,
+      guess: r.guess ? inkPlain(r.guess) : r.guess,
+    })),
+    notes: noteRows,
+    photo: photoData,
+    deck: activeDeckId,
+  };
+  downloadText(`couplet-${room}-${todayKey()}.json`, JSON.stringify(bundle, null, 1), "application/json");
+  toast("saved — a complete copy of the parlor ✦");
+}
+function exportBook() {
+  if (!ritualData.length) return toast("no nights yet — seal your first four first");
+  downloadText(`book-of-nights-${room}.txt`, bookOfNightsText(ritualData, state.players), "text/plain");
+  toast("saved — the book of nights ✦");
+}
+
 /* ---------------- TANGLE ---------------- */
 let tangleSel = new Set();
 let tangleSelBy = null;
@@ -2474,6 +2568,17 @@ function wire() {
     }
   });
   $("#duet-book-btn").addEventListener("click", openWordBook);
+  $("#review-btn").addEventListener("click", openReview);
+  $("#review-cancel").addEventListener("click", () =>
+    $("#review-modal").classList.add("hidden"),
+  );
+  $("#review-share").addEventListener("click", () =>
+    shareText(
+      reviewShareCard(currentReview(), state.players, location.origin + location.pathname),
+    ),
+  );
+  $("#review-export").addEventListener("click", exportParlor);
+  $("#review-book").addEventListener("click", exportBook);
   $("#words-cancel").addEventListener("click", () =>
     $("#words-modal").classList.add("hidden"),
   );
@@ -2539,6 +2644,7 @@ function wire() {
     "note-modal": "#note-cancel",
     "words-modal": "#words-cancel",
     "invite-modal": "#invite-cancel",
+    "review-modal": "#review-cancel",
   };
   document.addEventListener("keydown", (e) => {
     if (e.key !== "Escape") return;

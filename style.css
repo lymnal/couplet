@@ -816,3 +816,11 @@ button, .key, .word-tile { touch-action: manipulation; }
 .qr-wrap svg { display: block; width: 100%; height: auto; }
 .invite-code { color: var(--linen-dim); font-size: 0.85rem; margin-top: 8px; }
 .invite-code b { font-family: "Fraunces", serif; letter-spacing: 0.1em; color: var(--linen); }
+
+/* ============ the parlor, in review ============ */
+.review-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 0 12px; }
+.review-tile { background: var(--ink-2); border: 1px solid var(--line); border-radius: 12px; padding: 12px 6px 10px; }
+.review-tile b { display: block; font-family: "Fraunces", serif; font-weight: 640; font-size: 1.6rem; line-height: 1.1; color: var(--aqua-pale); }
+.review-tile span { display: block; margin-top: 4px; font-size: 0.66rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--linen-dim); }
+.review-lines { color: var(--linen-dim); font-size: 0.86rem; line-height: 1.55; }
+.review-actions { flex-wrap: wrap; gap: 8px; }

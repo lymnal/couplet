@@ -33,6 +33,10 @@ import {
   inkShareCard,
   attuneShareCard,
   appendDuetLog,
+  longestRitualStreak,
+  parlorReview,
+  reviewShareCard,
+  bookOfNightsText,
 } from "./lib.js";
 
 test("otherSlot flips both ways", () => {
@@ -513,4 +517,64 @@ test("the book of words is newest-first and capped", () => {
   assert.equal(next.length, 3);
   assert.equal(next[0].w, "new");
   assert.equal(next[2].w, "1");
+});
+
+/* ---------------- the parlor, in review ---------------- */
+
+const night = (day, slot, items = ["a", "b", "c", "d"]) => ({ day, slot, items });
+
+test("longest streak counts only consecutive both-sealed nights", () => {
+  const rows = [
+    night("2026-08-01", "A"), night("2026-08-01", "B"),
+    night("2026-08-02", "A"), night("2026-08-02", "B"),
+    night("2026-08-03", "A"),                              // half a night
+    night("2026-08-05", "A"), night("2026-08-05", "B"),
+  ];
+  assert.equal(longestRitualStreak(rows), 2);
+  assert.equal(longestRitualStreak([]), 0);
+});
+
+test("parlorReview counts what the parlor holds and finds its first day", () => {
+  const r = parlorReview({
+    ritual: [night("2026-08-10", "A"), night("2026-08-10", "B"), night("2026-08-11", "A")],
+    inklings: [{ day: "2026-08-09", match: true }, { day: "2026-08-09", match: false }, { day: "2026-08-09", match: null }],
+    notes: [{ at: "2026-08-12T10:00:00Z" }],
+    state: { duetLog: [{ d: "2026-08-10", won: true, n: 3 }, { d: "2026-08-11", won: false, n: 6 }], stats: { tangleWins: 2, tanglePerfect: 1, attunePoints: 20, attuneRounds: 7 } },
+    today: "2026-09-01",
+  });
+  assert.equal(r.since, "2026-08-09");
+  assert.equal(r.nights, 1);
+  assert.equal(r.thingsWritten, 12);
+  assert.equal(r.wordsGot, 1);
+  assert.equal(r.wordsPlayed, 2);
+  assert.equal(r.bestGuess, 3);
+  assert.equal(r.tangles, 2);
+  assert.equal(r.inTune, 71);
+  assert.equal(r.known, 50);
+  assert.equal(r.cards, 2);
+  assert.equal(r.notes, 1);
+});
+
+test("an empty parlor reviews without blowing up", () => {
+  const r = parlorReview({ today: "2026-09-01" });
+  assert.equal(r.since, "2026-09-01");
+  assert.equal(r.bestGuess, null);
+  assert.equal(r.inTune, null);
+  assert.match(reviewShareCard(r, null, "u"), /just opened/);
+});
+
+test("review brag names the pair and skips empty stats", () => {
+  const card = reviewShareCard({ since: "2026-08-01", nights: 12, longestStreak: 5, wordsGot: 0, tangles: 3, known: 80 }, { A: "Ana", B: "Leo" }, "https://x.test/");
+  assert.match(card, /Ana & Leo, since 2026-08-01/);
+  assert.match(card, /12 nights of four things · a 5-night streak · 3 tangles untangled · 80% known/);
+  assert.doesNotMatch(card, /words/);
+});
+
+test("the book of nights reads in order with names", () => {
+  const txt = bookOfNightsText([night("2026-08-02", "B", ["soup"]), night("2026-08-01", "A", ["rain", "you"])], { A: "Ana", B: "Leo" });
+  const lines = txt.split("\n");
+  assert.equal(lines[0], "THE BOOK OF NIGHTS");
+  assert.ok(lines.indexOf("2026-08-01") < lines.indexOf("2026-08-02"));
+  assert.ok(txt.includes("  Ana\n    · rain\n    · you"));
+  assert.ok(txt.includes("  Leo\n    · soup"));
 });

@@ -340,3 +340,83 @@ export function appendDuetLog(log, entry, cap = DUET_LOG_CAP) {
   const prev = Array.isArray(log) ? log : [];
   return [entry, ...prev].slice(0, cap);
 }
+
+/* ---------------- the parlor, in review ----------------
+ * Everything the two of them have built up, counted. This is the part of a
+ * parlor nobody else can copy, so it gets a card of its own. */
+export function longestRitualStreak(rows) {
+  const m = ritualMap(rows);
+  const days = Object.keys(m).filter((d) => m[d].A && m[d].B).sort();
+  let best = 0, run = 0, prev = null;
+  for (const d of days) {
+    run = prev && prevDay(d) === prev ? run + 1 : 1;
+    best = Math.max(best, run);
+    prev = d;
+  }
+  return best;
+}
+
+const pct = (num, den) => (den > 0 ? Math.round((100 * num) / den) : null);
+
+export function parlorReview({ ritual = [], inklings = [], notes = [], state = {}, today }) {
+  const m = ritualMap(ritual);
+  const nights = Object.keys(m).filter((d) => m[d].A && m[d].B);
+  const log = Array.isArray(state.duetLog) ? state.duetLog : [];
+  const wins = log.filter((e) => e.won);
+  const resolved = inklings.filter((r) => r.match === true || r.match === false);
+  const stats = state.stats ?? {};
+  const firstDay =
+    [
+      ...Object.keys(m),
+      ...inklings.map((r) => r.day),
+      ...notes.map((n) => String(n.at ?? "").slice(0, 10)),
+      ...log.map((e) => e.d),
+    ]
+      .filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d))
+      .sort()[0] ?? today;
+  return {
+    since: firstDay,
+    nights: nights.length,
+    thingsWritten: ritual.length * 4,
+    longestStreak: longestRitualStreak(ritual),
+    wordsGot: wins.length,
+    wordsPlayed: log.length,
+    bestGuess: wins.length ? Math.min(...wins.map((e) => Number(e.n) || 6)) : null,
+    tangles: Number(stats.tangleWins) || 0,
+    tanglesPerfect: Number(stats.tanglePerfect) || 0,
+    inTune: pct(Number(stats.attunePoints) || 0, 4 * (Number(stats.attuneRounds) || 0)),
+    known: pct(resolved.filter((r) => r.match).length, resolved.length),
+    cards: resolved.length,
+    notes: notes.length,
+  };
+}
+
+export function reviewShareCard(r, names, url) {
+  const who = names?.A && names?.B ? `${names.A} & ${names.B}` : "the two of us";
+  const bits = [];
+  if (r.nights) bits.push(`${r.nights} night${r.nights === 1 ? "" : "s"} of four things`);
+  if (r.longestStreak > 1) bits.push(`a ${r.longestStreak}-night streak`);
+  if (r.wordsGot) bits.push(`${r.wordsGot} word${r.wordsGot === 1 ? "" : "s"} got together`);
+  if (r.tangles) bits.push(`${r.tangles} tangle${r.tangles === 1 ? "" : "s"} untangled`);
+  if (r.known != null) bits.push(`${r.known}% known`);
+  const line = bits.length ? bits.join(" · ") : "a parlor, just opened";
+  return `Couplet — ${who}, since ${r.since} ♥\n${line}\n${url}`;
+}
+
+/* the book of nights as plain text — the keepsake half of an export */
+export function bookOfNightsText(rows, names) {
+  const m = ritualMap(rows);
+  const name = (s) => names?.[s] ?? (s === "A" ? "A" : "B");
+  const out = ["THE BOOK OF NIGHTS", ""];
+  for (const d of Object.keys(m).sort()) {
+    out.push(d);
+    for (const s of ["A", "B"]) {
+      const r = m[d][s];
+      if (!r) continue;
+      out.push(`  ${name(s)}`);
+      for (const it of r.items ?? []) out.push(`    · ${it}`);
+    }
+    out.push("");
+  }
+  return out.join("\n");
+}
