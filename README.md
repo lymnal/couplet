@@ -2,7 +2,7 @@
   <img src="og.png" alt="Couplet — word games for two" width="640">
 </p>
 
-<h3 align="center">Five word games for exactly two people.</h3>
+<h3 align="center">Five word games for exactly two people — a couple, two best friends, siblings, a parent and a kid who moved away.</h3>
 <p align="center">
   Open the link. Text it to your person. Play.<br>
   No accounts, no feed, no app store — just you two in a little parlor.

@@ -35,7 +35,7 @@ import {
   pickAttuneSpectrums,
   inkDealPool,
   duetStreakAfterWin,
-} from "./lib.js?v=11";
+} from "./lib.js?v=12";
 
 const CFG = window.COUPLET_CONFIG;
 /* vendored UMD build (vendor/supabase.js, pinned 2.112.4) — a CDN module
@@ -44,7 +44,7 @@ const CFG = window.COUPLET_CONFIG;
 const { createClient } = window.supabase;
 const PUZZLES = window.TANGLE_PUZZLES;
 /* asset version — ./bump.sh keeps this in step with index.html and sw.js */
-const ASSET_VERSION = "11";
+const ASSET_VERSION = "12";
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => [...document.querySelectorAll(sel)];
 
@@ -90,7 +90,7 @@ const slotName = (s) =>
   s === me.slot
     ? me.name
     : (state.players?.[s] ?? (s === "A" ? "Emerald" : "Mint"));
-const partnerName = () => state.players?.[otherSlot(me.slot)] ?? "your partner";
+const partnerName = () => state.players?.[otherSlot(me.slot)] ?? "your person";
 
 /* ---------------- shared state ---------------- */
 /* Both phones must agree on which night it is, so the day boundary belongs
@@ -1103,7 +1103,7 @@ function renderAttune() {
       btn.textContent = "send the clue";
       btn.addEventListener("click", () => {
         const v = input.value.trim();
-        if (!v) return toast("give them something, love");
+        if (!v) return toast("give them something to go on");
         mutate((st) => {
           const at = st.attune;
           if (!at || at.phase !== "clue") return;
@@ -1248,7 +1248,7 @@ const FOUR_LEADS = [
   "What four things would you put in today's time capsule?",
   "What four things made you feel like you today?",
   "What four moments would you rewind to?",
-  "What four things did the city give you today?",
+  "What four things did the day hand you for free?",
   "What four things did you savor today?",
   "What four things held you steady today?",
   "What four glimmers did you catch today?",
@@ -1292,7 +1292,7 @@ const FOUR_LEADS = [
   "What four things felt lighter today?",
   "What four things would you underline from today?",
   "What four things kept their promise today?",
-  "What four things made you feel lucky in love today?",
+  "What four things made you feel lucky today?",
   "What four things did the morning get right?",
   "What four things did the evening deliver?",
   "What four things would you tuck under your pillow tonight?",
@@ -1435,7 +1435,7 @@ function composeCard(prefill) {
   btn.textContent = "seal tonight's four 🔒";
   btn.addEventListener("click", async () => {
     const items = inputs.map((i) => i.value.trim());
-    if (items.some((x) => !x)) return toast("it's called four things, love 😉");
+    if (items.some((x) => !x)) return toast("it's called four things 😉");
     btn.disabled = true;
     await saveFour(items);
   });
@@ -1791,7 +1791,7 @@ function pressKey(k) {
   renderDuet();
 }
 function submitSuggestion() {
-  if (suggestTyped.length !== 5) return toast("five letters, love");
+  if (suggestTyped.length !== 5) return toast("five letters, please");
   if (!isGuessable(suggestTyped)) return toast("not in our dictionary");
   broadcast("suggest", { w: suggestTyped });
   toast(`whispered to ${slotName(state.duet.turn)} ✨`);
@@ -1800,7 +1800,7 @@ function submitSuggestion() {
 }
 function submitGuess() {
   const d = state.duet;
-  if (typed.length !== 5) return toast("five letters, love");
+  if (typed.length !== 5) return toast("five letters, please");
   if (!isGuessable(typed)) {
     $$("#duet-board .board-row")[d.guesses.length]?.classList.add("shake");
     return toast("not in our dictionary");
@@ -2011,7 +2011,7 @@ function renderTangle() {
           "tangle",
           perfect ? "Flawless, you two" : "Untangled ♥",
           (perfect
-            ? "Not a single miss. Power couple."
+            ? "Not a single miss. Power pair."
             : "Got there together.") +
             "\n" +
             winLine(),
@@ -2115,7 +2115,7 @@ function submitTangle() {
     const oneAway = Object.values(counts).includes(3);
     $("#tangle-grid").classList.add("shake");
     setTimeout(() => $("#tangle-grid").classList.remove("shake"), 450);
-    sharedToast(oneAway ? "so close — one away!" : "not quite, loves", 4200);
+    sharedToast(oneAway ? "so close — one away!" : "not quite — try another four", 4200);
     mutate((st) => {
       st.tangle.tried.push(key);
       st.tangle.mistakes += 1;
@@ -2151,9 +2151,9 @@ const WIN_LINES = [
   "Tell each other four grateful things tonight ♥",
   "This calls for dessert.",
   "Main-character energy ✨",
-  "Next stop: another date night",
+  "Next stop: another round",
   "Celebrate with a movie night 🍿",
-  "You'd survive a rom-com montage",
+  "You two would survive a montage",
   "Somewhere a lavender field approves",
   "Encore! Encore!",
 ];
@@ -3017,7 +3017,7 @@ function renderInklings() {
       seal.textContent = meIsSubject ? "seal my answer 🔒" : "seal my guess 🔒";
       seal.addEventListener("click", async () => {
         const v = inp.value.trim();
-        if (!v) return toast("a few words, love 😉");
+        if (!v) return toast("a few words 😉");
         seal.disabled = true;
         const fields = {
           p_idx: idx,

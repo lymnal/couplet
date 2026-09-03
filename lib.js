@@ -185,7 +185,7 @@ export const renderInkPrompt = (template, subjectName, partnerName) =>
   (template ?? "")
     .replaceAll("@S's", subjectName ? `${subjectName}'s` : "their")
     .replaceAll("@S", subjectName ?? "they")
-    .replaceAll("@P", partnerName ?? "your partner");
+    .replaceAll("@P", partnerName ?? "your person");
 
 /* ---------------- decks ----------------
  * A parlor can carry a custom deck: full replacement lists for any of the

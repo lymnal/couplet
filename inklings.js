@@ -38,8 +38,8 @@ window.INKLINGS_DECK = [
   "What's @S's autopilot response to 'how are you'?",
   // us & memories
   "What did @S notice first about @P?",
-  "What was @S actually thinking on the first date?",
-  "What's @S's favorite date you two have had?",
+  "What was @S actually thinking the day you two met?",
+  "What's @S's favorite day out the two of you have had?",
   "Which song is 'ours', according to @S?",
   "What's the best meal you two have shared, per @S?",
   "What's @S's favorite inside joke of yours?",
@@ -64,7 +64,7 @@ window.INKLINGS_DECK = [
   "What's @S's favorite smell?",
   "What's @S's ideal Sunday morning?",
   "Window or aisle for @S?",
-  "What's @S's love language, in their own words?",
+  "How does @S like to be appreciated, in their own words?",
   "Early 20s @S's favorite band?",
   "What game is @S secretly the most competitive about?",
   "What's @S's favorite holiday?",
@@ -85,7 +85,7 @@ window.INKLINGS_DECK = [
   "What cartoon character is @S?",
   "What's @S's plan if they shrink to 5cm tall?",
   // feelings-lite & sweet
-  "What makes @S feel instantly loved?",
+  "What makes @S feel instantly looked after?",
   "What's @S's happy place?",
   "What's @S secretly proud of lately?",
   "What compliment does @S never get tired of?",
