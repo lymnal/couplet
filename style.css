@@ -757,3 +757,10 @@ button, .key, .word-tile { touch-action: manipulation; }
 /* keyboard users get the same affordances the thumb does */
 .photo-frame:focus-visible,
 .dial-wrap svg:focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; border-radius: 12px; }
+
+/* the one-time home-screen nudge */
+.install-hint {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 12px;
+  margin: 12px 0 4px; padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--ink-2); color: var(--linen-dim); font-size: 0.85rem; text-align: center;
+}

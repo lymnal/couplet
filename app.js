@@ -632,6 +632,7 @@ function renderLobby() {
         ? ""
         : "new!";
   $("#invite-btn").textContent = `Invite ${partnerName()} — send the link`;
+  renderInstallHint();
   renderPhoto();
   renderNotes();
   renderPresence();
@@ -2321,6 +2322,22 @@ function wire() {
       toast("link copied — text it over");
     }
   });
+  $("#install-go").addEventListener("click", async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    const { outcome } = await installPrompt.userChoice.catch(() => ({}));
+    installPrompt = null;
+    if (outcome === "accepted") toast("it's on your home screen ♥");
+    renderInstallHint();
+  });
+  $("#install-dismiss").addEventListener("click", () => {
+    try {
+      localStorage.setItem("couplet_install_dismissed", "1");
+    } catch {
+      /* fine */
+    }
+    renderInstallHint();
+  });
   $("#switch-btn").addEventListener("click", () => {
     localStorage.removeItem("couplet_slot");
     location.href = location.pathname;
@@ -2440,6 +2457,7 @@ async function enterParlor() {
      address bar — browser history, link previews, and screen shares all
      leak it. The invite link still carries it once; scrubbed after join. */
   history.replaceState(null, "", location.pathname);
+  countVisit();
   applyCachedDeck();
   await loadWords();
   show("lobby");
@@ -2447,6 +2465,48 @@ async function enterParlor() {
   await connect();
   refreshDeck();
   flushQueue();
+}
+
+/* ---------------- home screen ----------------
+ * The installed app is where the parlor lives best: offline shell, no
+ * browser chrome, an icon next to the messages app. Nudge once, gently,
+ * after a few visits — and only where a nudge can lead somewhere. */
+let installPrompt = null;
+addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  installPrompt = e;
+  renderInstallHint();
+});
+const isStandalone = () =>
+  matchMedia("(display-mode: standalone)").matches ||
+  navigator.standalone === true;
+function renderInstallHint() {
+  const hint = $("#install-hint");
+  let visits = 0;
+  let dismissed = false;
+  try {
+    visits = Number(localStorage.getItem("couplet_visits") ?? 0);
+    dismissed = !!localStorage.getItem("couplet_install_dismissed");
+  } catch {
+    /* private mode — no nudge */
+  }
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const show =
+    !isStandalone() && !dismissed && visits >= 3 && (installPrompt || ios);
+  hint.classList.toggle("hidden", !show);
+  if (!show) return;
+  $("#install-go").classList.toggle("hidden", !installPrompt);
+  $("#install-text").textContent = installPrompt
+    ? "keep the parlor on your home screen ♥"
+    : "keep it on your home screen: share → add to home screen ♥";
+}
+function countVisit() {
+  try {
+    const n = Number(localStorage.getItem("couplet_visits") ?? 0) + 1;
+    localStorage.setItem("couplet_visits", String(n));
+  } catch {
+    /* nothing to count in */
+  }
 }
 
 /* ---------------- offline ---------------- */
