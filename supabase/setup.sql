@@ -52,6 +52,21 @@ begin
 end;
 $$;
 
+-- Storage budget (added 2026-09-03). Every per-parlor write was already
+-- capped, but nothing capped the number of parlors — a script could mint
+-- rooms until the disk was full and sync died for everyone. Every insert
+-- path now checks the database's actual size first; existing parlors keep
+-- working, new rows wait until there's room. Tune the number to your plan.
+create or replace function public.assert_budget()
+returns void language plpgsql as $$
+begin
+  if pg_database_size(current_database()) > 420 * 1024 * 1024 then
+    raise exception 'the parlors are full tonight — try again later';
+  end if;
+end;
+$$;
+revoke execute on function public.assert_budget() from anon, authenticated, public;
+
 create or replace function public.get_room(p_code text)
 returns jsonb
 language sql
@@ -84,6 +99,11 @@ begin
   new_rev := coalesce((p_state->>'rev')::numeric, 0);
   select state into cur from public.rooms where code = c for update;
   if not found then
+    -- a new parlor: short codes are guessable, and disk is finite
+    if length(c) < 6 then
+      raise exception 'parlor codes need at least 6 characters';
+    end if;
+    perform public.assert_budget();
     insert into public.rooms (code, state, updated_at) values (c, p_state, now());
     return p_state;
   end if;
@@ -128,6 +148,7 @@ begin
   if (select count(*) from public.four_things where code = c) > 5000 then
     raise exception 'this parlor has too many entries';
   end if;
+  perform public.assert_budget();
   insert into public.four_things (code, day, slot, items)
   values (c, p_day, p_slot, p_items)
   on conflict (code, day, slot) do update set items = excluded.items;
@@ -153,6 +174,7 @@ begin
     raise exception 'keepsake too large: % bytes (max 1200000)', length(p_data);
   end if;
   if length(p_kind) > 32 then raise exception 'invalid keepsake kind'; end if;
+  perform public.assert_budget();
   insert into public.keepsakes (code, kind, data, updated_at)
   values (c, p_kind, p_data, now())
   on conflict (code, kind) do update set data = excluded.data, updated_at = now();
@@ -210,6 +232,7 @@ begin
   if (select count(*) from public.inklings where code = c) > 5000 then
     raise exception 'this parlor has too many inklings';
   end if;
+  perform public.assert_budget();
   insert into public.inklings (code, day, idx, card, subject, truth, guess, match)
   values (c, p_day, p_idx, p_card, p_subject, p_truth, p_guess, p_match)
   on conflict (code, day, idx) do update set
@@ -270,6 +293,7 @@ begin
   if (select count(*) from public.notes where code = c) > 2000 then
     raise exception 'this parlor''s wall is full';
   end if;
+  perform public.assert_budget();
   insert into public.notes (code, id, by, name, body, at)
   values (c, p_id, p_by, p_name, left(p_body, 500), coalesce(p_at, now()))
   on conflict (code, id) do nothing;

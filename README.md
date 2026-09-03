@@ -92,6 +92,14 @@ node --test lib.test.js   # merge logic, scoring, queue rules
 ./backup.sh --install YOURCODE   # …twice a week, automatically (macOS)
 ```
 
+## Watch it
+
+[![two phones, one parlor — the trailer](docs/trailer.gif)](https://github.com/lymnal/couplet/releases/download/v11/couplet-story.mp4)
+
+Fifty seconds, both phones real, nothing staged — it was shot from the app
+itself, two browsers in one live parlor. [portrait](https://github.com/lymnal/couplet/releases/download/v11/couplet-story.mp4) ·
+[square](https://github.com/lymnal/couplet/releases/download/v11/couplet-square.mp4) · [landscape](https://github.com/lymnal/couplet/releases/download/v11/couplet-land.mp4).
+
 ## Why it's like this
 
 I built it for my partner and me, and it is deliberately not a startup: no

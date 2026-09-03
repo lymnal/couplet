@@ -35,7 +35,7 @@ import {
   pickAttuneSpectrums,
   inkDealPool,
   duetStreakAfterWin,
-} from "./lib.js?v=10";
+} from "./lib.js?v=11";
 
 const CFG = window.COUPLET_CONFIG;
 /* vendored UMD build (vendor/supabase.js, pinned 2.112.4) — a CDN module
@@ -44,7 +44,7 @@ const CFG = window.COUPLET_CONFIG;
 const { createClient } = window.supabase;
 const PUZZLES = window.TANGLE_PUZZLES;
 /* asset version — ./bump.sh keeps this in step with index.html and sw.js */
-const ASSET_VERSION = "10";
+const ASSET_VERSION = "11";
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => [...document.querySelectorAll(sel)];
 
@@ -619,13 +619,16 @@ function flareOrb(slot) {
 function renderLobby() {
   $("#lobby-room-chip").textContent = room;
   const s = state.stats;
+  /* numbers only — stats arrive through shared state, which the other phone
+     writes, and this is the one line that still renders as markup */
+  const n = (v) => Number(v) || 0;
   $("#stats-strip").innerHTML =
-    `<span><b>${s.streak}</b> streak ♥</span>` +
-    `<span><b>${s.duetWins}</b> duets won</span>` +
-    `<span><b>${s.tangleWins}</b> tangles solved</span>` +
-    `<span><b>${ritualStreak()}</b> nights ✦</span>` +
-    ((s.attuneRounds ?? 0) > 0
-      ? `<span><b>${Math.round((100 * (s.attunePoints ?? 0)) / (4 * s.attuneRounds))}%</b> in tune</span>`
+    `<span><b>${n(s.streak)}</b> streak ♥</span>` +
+    `<span><b>${n(s.duetWins)}</b> duets won</span>` +
+    `<span><b>${n(s.tangleWins)}</b> tangles solved</span>` +
+    `<span><b>${n(ritualStreak())}</b> nights ✦</span>` +
+    (n(s.attuneRounds) > 0
+      ? `<span><b>${Math.round((100 * n(s.attunePoints)) / (4 * n(s.attuneRounds)))}%</b> in tune</span>`
       : "") +
     (inkResolved().length > 0
       ? `<span><b>${Math.round((100 * inkResolved().filter((r) => r.match).length) / inkResolved().length)}%</b> known</span>`
@@ -2211,10 +2214,18 @@ function wire() {
         $("#name-input").focus();
         return;
       }
+      /* the backend refuses to mint a parlor under a short code — a code is
+         the only key there is, and a four-letter one is a guess away */
+      const typed = $("#room-input").value.trim().toUpperCase();
+      if (typed && typed.length < 6) {
+        toast("parlor codes need at least 6 characters");
+        $("#room-input").focus();
+        return;
+      }
       me = { slot: b.dataset.slot, name };
       store.slot = me.slot;
       store.name = name;
-      room = ($("#room-input").value.trim() || randomRoom()).toUpperCase();
+      room = typed || randomRoom();
       store.room = room;
       enterParlor();
     }),
