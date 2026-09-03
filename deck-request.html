@@ -65,6 +65,13 @@ button:disabled { opacity: .5; }
 .done { display: none; text-align: center; padding: 30px 10px; line-height: 1.6; }
 .done b { font-family: "Fraunces", serif; font-size: 1.4rem; letter-spacing: .08em; color: var(--pale); display: block; margin: 10px 0; }
 .err { color: var(--danger); text-align: center; margin-top: 14px; min-height: 1.4em; font-size: .9rem; }
+.counter { text-align: center; color: var(--pale); font-size: .85rem; letter-spacing: .06em; margin: -10px 0 18px; min-height: 1.3em; }
+.lookup { margin-top: 44px; padding-top: 22px; border-top: 1px solid var(--line); }
+.lookup h2 { font-family: "Fraunces", serif; font-style: italic; font-weight: 560; font-size: 1.2rem; text-align: center; margin-bottom: 10px; }
+.lookup form { display: flex; gap: 10px; }
+.lookup input { flex: 1; letter-spacing: .1em; text-transform: uppercase; }
+button.ghost { width: auto; margin: 0; padding: 12px 18px; background: none; border: 1.5px solid var(--line); color: var(--linen); font-weight: 500; }
+.status { text-align: center; color: var(--dim); margin-top: 12px; min-height: 1.4em; line-height: 1.5; }
 </style>
 </head>
 <body>
@@ -72,6 +79,7 @@ button:disabled { opacity: .5; }
 <p class="wordmark"><a href="./">Couplet</a></p>
 <h1>A deck written for the two of you</h1>
 <p class="lede">Tell me about you two and I'll write a set of puzzles, cards, and prompts that only makes sense in your parlor. Free for the first twenty. Written by hand, so give it a week or two.</p>
+<p class="counter" id="counter">&nbsp;</p>
 
 <form id="form" autocomplete="off">
   <label for="f-names">Your two names</label>
@@ -101,15 +109,48 @@ button:disabled { opacity: .5; }
 <div class="done" id="done">
   Got it. Your request is
   <b id="req-id"></b>
-  Keep that in case you need to ask about it. When the deck is ready, a claim token arrives at the address you gave — open your parlor, tap <i>decks</i>, paste it, and it's yours, for both of you.
+  Keep it — you can check on it at the bottom of this page anytime. When the deck is ready, a claim token arrives at the address you gave — open your parlor, tap <i>decks</i>, paste it, and it's yours, for both of you.
 </div>
+<section class="lookup">
+  <h2>Check on a request</h2>
+  <form id="lookup" autocomplete="off">
+    <input id="lookup-id" placeholder="your request id" maxlength="16" aria-label="request id" />
+    <button type="submit" class="ghost">look it up</button>
+  </form>
+  <p class="status" id="status"></p>
+</section>
 </main>
 <script src="vendor/supabase.js"></script>
 <script src="config.js"></script>
 <script>
 (function () {
   const cfg = window.COUPLET_CONFIG;
+  const supa = supabase.createClient(cfg.supabaseUrl, cfg.supabaseKey);
   const form = document.getElementById("form"), err = document.getElementById("err");
+
+  /* how many of the free twenty are left — honest, live, from the backend */
+  supa.rpc("free_decks_left").then(({ data }) => {
+    const c = document.getElementById("counter");
+    if (typeof data !== "number") return;
+    c.textContent = data > 0 ? `${data} of the first twenty still free` : "the first twenty are spoken for — requests still welcome, and I'll say what comes next";
+  });
+
+  /* a request id looks itself up */
+  const STATUS = {
+    received: "Received. It's in the queue — a week or two.",
+    writing: "Being written right now. Your token is close.",
+    delivered: "Delivered — the token went to the address you gave. Check spam if it hasn't turned up.",
+    unknown: "No request with that id. Check the letters — it's ten characters.",
+  };
+  document.getElementById("lookup").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const id = document.getElementById("lookup-id").value.trim();
+    const out = document.getElementById("status");
+    if (!id) return;
+    out.textContent = "…";
+    const { data, error } = await supa.rpc("request_status", { p_id: id });
+    out.textContent = error ? "couldn't check — try again in a moment" : (STATUS[data] ?? STATUS.unknown);
+  });
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     err.textContent = "";
@@ -124,7 +165,6 @@ button:disabled { opacity: .5; }
     const btn = document.getElementById("send");
     btn.disabled = true;
     try {
-      const supa = supabase.createClient(cfg.supabaseUrl, cfg.supabaseKey);
       const { data: id, error } = await supa.rpc("request_deck", { p_answers: answers, p_contact: String(data.get("contact")).trim() });
       if (error) throw error;
       form.style.display = "none";

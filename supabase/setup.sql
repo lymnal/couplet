@@ -386,7 +386,9 @@ create table if not exists public.deck_requests (
   answers      jsonb not null,
   contact      text,
   created_at   timestamptz not null default now(),
-  fulfilled_at timestamptz
+  fulfilled_at timestamptz,
+  status       text not null default 'received'
+               check (status in ('received', 'writing', 'delivered'))
 );
 alter table public.deck_requests enable row level security;
 revoke all on public.deck_requests from anon, authenticated;
@@ -414,6 +416,23 @@ begin
 end;
 $$;
 grant execute on function public.request_deck(jsonb, text) to anon, authenticated;
+
+-- Request status + the free-twenty counter: a request keeps its id after
+-- delivery so the couple can look it up; answers and contact are wiped then.
+create or replace function public.request_status(p_id text)
+returns text language sql security definer set search_path = public as $$
+  select coalesce(
+    (select status from public.deck_requests where id = upper(trim(p_id))),
+    'unknown');
+$$;
+grant execute on function public.request_status(text) to anon, authenticated;
+
+-- "free for the first twenty" counts every request ever made, delivered or not
+create or replace function public.free_decks_left()
+returns int language sql security definer set search_path = public as $$
+  select greatest(0, 20 - (select count(*) from public.deck_requests))::int;
+$$;
+grant execute on function public.free_decks_left() to anon, authenticated;
 
 -- Erasure (added 2026-08-26): the app's "delete parlor" button. Knowing the
 -- code is the capability, same as reading it.
