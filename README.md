@@ -35,9 +35,9 @@ Every puzzle, prompt, and spectrum is hand-crafted — none of it is filler.
 
 The default content is written for any two people anywhere. But a parlor can
 carry a **personalized deck** — Tangle puzzles about your city, Inklings cards
-about your cat, prompts in your private dialect. A deck replaces any of the
-four content sets for that parlor alone; whatever it leaves out falls back to
-the defaults. [Request one](https://github.com/lymnal/couplet/issues/new?template=deck-request.yml),
+about your cat, prompts in your private dialect, your own Duet answers. A
+deck replaces any of the five content sets for that parlor alone; whatever it
+leaves out falls back to the defaults. [Request one](https://github.com/lymnal/couplet/issues/new?template=deck-request.yml),
 or make your own — the format, the rules, and the self-hosting SQL live in
 [decks/](decks/README.md).
 
@@ -66,6 +66,13 @@ The work that took the longest is the work you can't see:
   page asks for another.
 - **Sealed simultaneous reveals.** Four Things and Inklings hide both answers
   until both are submitted — the small mechanic that makes honesty cheap.
+- **Last-write-wins, enforced twice.** Each phone decides which of two
+  competing snapshots survives (revision, then clock), and the database applies
+  the same rule before accepting a write — so a phone that wakes from a night
+  in a bag adopts the newer parlor instead of overwriting it.
+- **The night belongs to the parlor.** The day boundary for streaks and
+  rituals is the parlor's own timezone, recorded when it's made — not the
+  server's, and not whichever phone happens to write first.
 
 ## Run your own parlor
 
