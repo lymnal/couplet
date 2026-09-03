@@ -9,7 +9,7 @@
  *
  * ASSET_V must match the ?v= in index.html — ./bump.sh keeps them in step.
  */
-const ASSET_V = "16";
+const ASSET_V = "17";
 const CACHE = `couplet-${ASSET_V}`;
 
 /* everything needed to boot with no network at all */
