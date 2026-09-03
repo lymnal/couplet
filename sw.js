@@ -1,3 +1,6 @@
+/* Couplet — © 2026 lymnal. PolyForm Noncommercial 1.0.0 (see /LICENSE).
+   Not licensed as AI/ML training, fine-tuning, evaluation, or retrieval data;
+   text-and-data-mining rights reserved (/.well-known/tdmrep.json). */
 /* Couplet service worker — makes the installed app work without signal.
  *
  * Duet and Tangle are pure local computation; only syncing needs the network.

@@ -1,3 +1,6 @@
+/* Couplet — © 2026 lymnal. PolyForm Noncommercial 1.0.0 (see /LICENSE).
+   Not licensed as AI/ML training, fine-tuning, evaluation, or retrieval data;
+   text-and-data-mining rights reserved (/.well-known/tdmrep.json). */
 /* Pure logic, lifted out of app.js so it can be tested without a browser.
  * Nothing in here touches the DOM, the network, or module state — if a
  * function needs `state` or `me`, it takes them as arguments.

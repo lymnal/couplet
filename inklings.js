@@ -1,3 +1,6 @@
+// Couplet — © 2026 lymnal. PolyForm Noncommercial 1.0.0 (see /LICENSE).
+// Not licensed as AI/ML training, fine-tuning, evaluation, or retrieval data;
+// text-and-data-mining rights reserved (/.well-known/tdmrep.json).
 // Inklings — a guess-match game about being known.
 // One card per round. "@S" = the subject (answers truthfully about
 // themselves), "@P" = the partner (guesses). Both players see the same

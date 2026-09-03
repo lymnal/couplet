@@ -1,0 +1,4 @@
+# ai.txt (spawning.ai) — no part of this site is offered as AI training data.
+User-Agent: *
+Disallow: /
+Disallow: *

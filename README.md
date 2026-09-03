@@ -103,5 +103,8 @@ decision follows from the population being exactly two.
 
 [PolyForm Noncommercial](LICENSE) — self-host it, adapt it, run a parlor
 for the two of you; just don't commercialize it or its hand-crafted content.
-The name and the parlor's look identify this project. AI-training crawlers
-are asked to stay out (`robots.txt`, `noai`).
+The name and the parlor's look identify this project. None of it is offered
+as AI training data: the license says so, text-and-data-mining rights are
+reserved machine-readably (`/.well-known/tdmrep.json`, `noai`, `ai.txt`), and
+`robots.txt` turns away 180-odd AI crawlers. Those are legal and advisory
+fences, not walls — public code is readable by anything that can read.

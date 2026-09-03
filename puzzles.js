@@ -1,3 +1,6 @@
+// Couplet — © 2026 lymnal. PolyForm Noncommercial 1.0.0 (see /LICENSE).
+// Not licensed as AI/ML training, fine-tuning, evaluation, or retrieval data;
+// text-and-data-mining rights reserved (/.well-known/tdmrep.json).
 // Original puzzle bank for Tangle (a Connections-style game).
 // Each puzzle: 4 groups of 4 unique words, difficulty 0 (easiest) → 3 (trickiest).
 // All puzzles are original creations — no NYT content.

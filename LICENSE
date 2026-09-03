@@ -9,6 +9,13 @@ content requires a separate license from the author.
 "Couplet", the wordmark, and the parlor trade dress identify this project;
 don't use them for a different one.
 
+Using the software or its content as training, fine-tuning, evaluation, or
+retrieval data for a machine-learning or AI system is commercial use for the
+purposes of this license and is not permitted without a separate license.
+Text-and-data-mining rights are expressly reserved (EU Directive 2019/790,
+Article 4(3)); the machine-readable reservation is at /.well-known/tdmrep.json
+and in robots.txt / ai.txt.
+
 (Versions before 2026-08-26 were published under MIT; this license governs
 this and later versions.)
 
