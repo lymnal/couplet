@@ -38,7 +38,7 @@ import {
   pickAttuneSpectrums,
   inkDealPool,
   duetStreakAfterWin,
-} from "./lib.js?v=17";
+} from "./lib.js?v=18";
 
 const CFG = window.COUPLET_CONFIG;
 /* vendored UMD build (vendor/supabase.js, pinned 2.112.4) — a CDN module
@@ -47,7 +47,7 @@ const CFG = window.COUPLET_CONFIG;
 const { createClient } = window.supabase;
 const PUZZLES = window.TANGLE_PUZZLES;
 /* asset version — ./bump.sh keeps this in step with index.html and sw.js */
-const ASSET_VERSION = "17";
+const ASSET_VERSION = "18";
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => [...document.querySelectorAll(sel)];
 
@@ -1257,7 +1257,7 @@ const FOUR_LEADS = [
   "What four things did you savor today?",
   "What four things held you steady today?",
   "What four glimmers did you catch today?",
-  "What four things whispered 'good day' today?",
+  "What four things said 'good day' without words?",
   "What four things would you toast to tonight?",
   "What four things did you learn or relearn today?",
   "What four things felt generous today?",
@@ -1282,16 +1282,16 @@ const FOUR_LEADS = [
   "What four things aged well today?",
   "What four things were softer than expected today?",
   "What four things did you give today, gladly?",
-  "What four things did today teach you about us?",
+  "What four things did today teach you about the two of you?",
   "What four things would you frame from today?",
   "What four things hummed along nicely today?",
-  "What four things made the commute bearable today?",
+  "What four things made the in-between hours bearable today?",
   "What four things felt like a good omen today?",
   "What four things did you catch yourself smiling at?",
   "What four things deserve applause tonight?",
   "What four things were quietly beautiful today?",
   "What four things made dinner taste better today?",
-  "What four things would your pet have loved about today?",
+  "What four things would a dog have loved about today?",
   "What four things made today feel spacious?",
   "What four things did you handle well today?",
   "What four things felt lighter today?",
@@ -1308,7 +1308,7 @@ const FOUR_LEADS = [
   "What four things felt worth the detour today?",
   "What four things would you thank a stranger for today?",
   "What four things made your shoulders drop today?",
-  "What four things belong in tonight's little museum?",
+  "What four things would you keep in a jar from today?",
   "What four things made today gentle on you?",
   "What four things deserve to be said out loud tonight?",
   "What four things ended today on a good note?",
