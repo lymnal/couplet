@@ -27,6 +27,11 @@ import {
   inkDealPool,
   duetStreakAfterWin,
   validTz,
+  tidyName,
+  describeGuess,
+  relativeAgo,
+  inkShareCard,
+  attuneShareCard,
 } from "./lib.js";
 
 test("otherSlot flips both ways", () => {
@@ -447,4 +452,52 @@ test("applyDeckContent installs duet answers and clears them without a deck", ()
   assert.equal(custom.duetAnswers, true);
   applyDeckContent(live, pristine, null);
   assert.deepEqual(live.duetAnswers, []);
+});
+
+/* ---------------- names, narration, brags ---------------- */
+
+test("tidyName trims, caps, and rejects non-strings", () => {
+  assert.equal(tidyName("  Ana "), "Ana");
+  assert.equal(tidyName("a".repeat(40)).length, 14);
+  assert.equal(tidyName(""), null);
+  assert.equal(tidyName("   "), null);
+  assert.equal(tidyName({ evil: 1 }), null);
+  assert.equal(tidyName(null), null);
+});
+
+test("describeGuess narrates a scored row", () => {
+  const s = describeGuess("storm", ["x", "x", "g", "y", "x"], "Ana");
+  assert.match(s, /^Ana guessed STORM: /);
+  assert.match(s, /O correct/);
+  assert.match(s, /R in the word/);
+  assert.match(s, /M not in the word$/);
+});
+
+test("relativeAgo is coarse and never negative", () => {
+  const now = Date.parse("2026-09-02T20:00:00Z");
+  const at = (s) => new Date(now - s * 1000).toISOString();
+  assert.equal(relativeAgo(at(30), now), "just now");
+  assert.equal(relativeAgo(at(-30), now), "just now"); // a fast clock
+  assert.equal(relativeAgo(at(5 * 60), now), "5 min ago");
+  assert.equal(relativeAgo(at(3 * 3600), now), "3 h ago");
+  assert.equal(relativeAgo(at(26 * 3600), now), "yesterday");
+  assert.equal(relativeAgo(at(3 * 86400), now), "3 days ago");
+  assert.equal(typeof relativeAgo(at(40 * 86400), now), "string");
+  assert.equal(relativeAgo("garbage", now), null);
+});
+
+test("inklings brag card counts hearts and carries the door", () => {
+  const card = inkShareCard(4, 5, "https://x.test/");
+  assert.match(card, /4 of 5/);
+  assert.match(card, /💛💛💛💛🖤/);
+  assert.match(card, /https:\/\/x\.test\/$/);
+  assert.match(inkShareCard(5, 5, "u"), /apparently/);
+  assert.match(inkShareCard(1, 5, "u"), /research/);
+});
+
+test("attune brag card lights the dial in proportion", () => {
+  const card = attuneShareCard(24, 28, "on the same wavelength", "u");
+  assert.match(card, /24\/28/);
+  assert.match(card, /💚💚💚💚💚💚🖤/);
+  assert.ok(attuneShareCard(0, 28, "beautiful strangers", "u").includes("🖤".repeat(7)));
 });

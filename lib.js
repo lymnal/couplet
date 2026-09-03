@@ -284,3 +284,49 @@ export function tangleShareCard(foundGroups, mistakes, puzzleNo, url) {
     mistakes === 0 ? "not a single miss" : `${mistakes} miss${mistakes > 1 ? "es" : ""}`;
   return `Couplet Tangle #${puzzleNo} — untangled together, ${miss} ♥\n${rows}\n${url}`;
 }
+
+/* ---------------- names & narration ---------------- */
+/* Names arrive from the other phone through shared state, so they are input:
+   strings only, no longer than the join screen allows. */
+export const NAME_MAX = 14;
+export const tidyName = (n) =>
+  (typeof n === "string" ? n.trim().slice(0, NAME_MAX) : "") || null;
+
+/* what a screen reader says for a scored Duet row */
+export const SCORE_WORD = { g: "correct", y: "in the word", x: "not in the word" };
+export const describeGuess = (w, score, by) =>
+  `${by} guessed ${w.toUpperCase()}: ` +
+  [...w].map((ch, i) => `${ch.toUpperCase()} ${SCORE_WORD[score[i]]}`).join(", ");
+
+/* "last here 3 h ago" — coarse on purpose; a parlor is not a presence app */
+export function relativeAgo(iso, nowMs = Date.now()) {
+  const t = Date.parse(iso);
+  if (Number.isNaN(t)) return null;
+  const s = Math.max(0, Math.round((nowMs - t) / 1000));
+  if (s < 90) return "just now";
+  const m = Math.round(s / 60);
+  if (m < 60) return `${m} min ago`;
+  const h = Math.round(m / 60);
+  if (h < 24) return `${h} h ago`;
+  const d = Math.round(h / 24);
+  if (d < 14) return d === 1 ? "yesterday" : `${d} days ago`;
+  return new Date(t).toLocaleDateString([], { month: "short", day: "numeric" });
+}
+
+/* the other two games get brag cards too — same shape, same door */
+export function inkShareCard(hits, total, url) {
+  const row = "💛".repeat(hits) + "🖤".repeat(Math.max(0, total - hits));
+  const line =
+    hits === total
+      ? "we know each other, apparently"
+      : hits * 2 >= total
+        ? "getting there, together"
+        : "more research required";
+  return `Couplet Inklings — ${hits} of ${total} guessed right, ${line} ♥\n${row}\n${url}`;
+}
+
+export function attuneShareCard(total, max, verdict, url) {
+  const lit = Math.round((7 * total) / max);
+  const dial = "💚".repeat(lit) + "🖤".repeat(7 - lit);
+  return `Couplet Attune — ${total}/${max} in tune, ${verdict} ♥\n${dial}\n${url}`;
+}

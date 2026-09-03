@@ -8,6 +8,12 @@ import {
   validateDeck,
   duetShareCard,
   tangleShareCard,
+  inkShareCard,
+  attuneShareCard,
+  tidyName,
+  describeGuess,
+  SCORE_WORD,
+  relativeAgo,
   otherSlot,
   slotClass,
   hashStr,
@@ -211,16 +217,14 @@ function mutate(fn) {
   state.rev += 1;
   state.updatedAt = new Date().toISOString();
   state.by = me.slot;
+  /* so the empty chair can say when it was last warm */
+  state.seen = { ...(state.seen ?? {}), [me.slot]: state.updatedAt };
   broadcast("state", { state });
   scheduleSave();
   renderAll();
 }
-/* Names arrive from the other phone through shared state, so they are
-   input: strings only, no longer than the join screen allows. Everything
-   that renders a name uses textContent, so this is belt and braces. */
-const NAME_MAX = 14;
-const tidyName = (n) =>
-  (typeof n === "string" ? n.trim().slice(0, NAME_MAX) : "") || null;
+/* Everything that renders a name uses textContent; tidying the shared doc on
+   the way in is belt and braces. */
 function tidyPlayers(st) {
   if (!st?.players || typeof st.players !== "object") return;
   for (const s of ["A", "B"]) {
@@ -567,10 +571,18 @@ function renderPresence() {
     ? `you're ${me.name} ✦ offline — your play is saved here ⌁`
     : partnerHere
       ? `you're ${me.name} ✦ ${partnerName()} is here with you ✨`
-      : `you're ${me.name} ✦ waiting for ${partnerName()}…`;
+      : `you're ${me.name} ✦ waiting for ${partnerName()}…${lastSeenBit()}`;
   $$("[data-presenceline]").forEach((el) => (el.textContent = line));
   $$("[data-roomchip]").forEach((chip) => (chip.textContent = room ?? ""));
   renderDuetPill();
+}
+/* when the other chair is empty, say when it was last warm */
+function lastSeenBit() {
+  const other = otherSlot(me.slot);
+  const iso =
+    state.seen?.[other] ?? (state.by === other ? state.updatedAt : null);
+  const ago = iso ? relativeAgo(iso, Date.now()) : null;
+  return ago ? ` last here ${ago}` : "";
 }
 /* a peer that reconnects in a loop can fire these hundreds of times a
    second; one flare per slot per beat is all the eye can read anyway */
@@ -1030,7 +1042,23 @@ function renderAttune() {
         st.attune = newAttuneSession(st);
       });
     });
-    stage.append(ptsEl, again);
+    const brag = document.createElement("button");
+    brag.className = "ghost-btn";
+    brag.textContent = "brag a little ♥";
+    brag.addEventListener("click", () =>
+      shareText(
+        attuneShareCard(
+          total,
+          ATTUNE_LEN * 4,
+          verdict,
+          location.origin + location.pathname,
+        ),
+      ),
+    );
+    const actions = document.createElement("div");
+    actions.className = "modal-actions";
+    actions.append(brag, again);
+    stage.append(ptsEl, actions);
     if (
       total >= 19 &&
       !modalShownFor(`attune-${(state.attuneUsed ?? []).length}-${total}`)
@@ -1535,11 +1563,6 @@ function ensureDuet() {
     });
   }
 }
-/* what a screen reader says for a scored row */
-const SCORE_WORD = { g: "correct", y: "in the word", x: "not in the word" };
-const describeGuess = (w, score, by) =>
-  `${by} guessed ${w.toUpperCase()}: ` +
-  [...w].map((ch, i) => `${ch.toUpperCase()} ${SCORE_WORD[score[i]]}`).join(", ");
 function scoreGuess(guess, answer) {
   const res = Array(5).fill("x");
   const rem = {};
@@ -2057,6 +2080,23 @@ function sharedToast(msg, ms = 3200) {
   toast(msg, ms);
   broadcast("feedback", { msg, ms });
 }
+/* hand a brag to the share sheet, or the clipboard where there isn't one */
+async function shareText(text) {
+  if (navigator.share) {
+    try {
+      await navigator.share({ text });
+    } catch {
+      /* dismissed */
+    }
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(text);
+    toast("copied — drop it in the group chat ♥");
+  } catch {
+    toast("couldn't copy — long-press to select it instead");
+  }
+}
 let toastTimer = null;
 function toast(msg, ms = 3200) {
   const t = $("#toast");
@@ -2400,18 +2440,8 @@ function wire() {
   $("#modal-close").addEventListener("click", closeModal);
   /* the brag is the invitation: a spoiler-free grid the group chat already
      knows how to read, with the door to the parlor riding along */
-  $("#modal-share").addEventListener("click", async () => {
-    if (!modalBrag) return;
-    if (navigator.share) {
-      try {
-        await navigator.share({ text: modalBrag });
-      } catch {
-        /* dismissed */
-      }
-    } else {
-      await navigator.clipboard.writeText(modalBrag);
-      toast("copied — drop it in the group chat ♥");
-    }
+  $("#modal-share").addEventListener("click", () => {
+    if (modalBrag) shareText(modalBrag);
   });
   $("#modal-again").addEventListener("click", () => {
     closeModal();
@@ -2809,7 +2839,18 @@ function renderInklings() {
     more.className = "ghost-btn";
     more.textContent = "deal 5 more";
     more.addEventListener("click", () => inkDeal(true));
-    recap.append(big, line, more);
+    const brag = document.createElement("button");
+    brag.className = "ghost-btn";
+    brag.textContent = "brag a little ♥";
+    brag.addEventListener("click", () =>
+      shareText(
+        inkShareCard(hits, todays.length, location.origin + location.pathname),
+      ),
+    );
+    const actions = document.createElement("div");
+    actions.className = "modal-actions";
+    actions.append(brag, more);
+    recap.append(big, line, actions);
     card.appendChild(recap);
     renderInkDots(stage, ses);
     renderInkLifetime(stage);
