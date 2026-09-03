@@ -28,6 +28,12 @@ const SHELL = [
   "./manifest.webmanifest",
   "./words/allowed.txt",
   "./words/answers.txt",
+  "./vendor/fonts/fraunces-italic-latin-ext.woff2",
+  "./vendor/fonts/fraunces-italic-latin.woff2",
+  "./vendor/fonts/fraunces-normal-latin-ext.woff2",
+  "./vendor/fonts/fraunces-normal-latin.woff2",
+  "./vendor/fonts/rubik-normal-latin-ext.woff2",
+  "./vendor/fonts/rubik-normal-latin.woff2",
 ];
 
 self.addEventListener("install", (e) => {
@@ -61,9 +67,6 @@ self.addEventListener("activate", (e) => {
 
 const isSupabase = (url) =>
   url.hostname.endsWith(".supabase.co") || url.protocol === "wss:";
-const isFont = (url) =>
-  url.hostname === "fonts.googleapis.com" ||
-  url.hostname === "fonts.gstatic.com";
 
 self.addEventListener("fetch", (e) => {
   const { request } = e;
@@ -90,21 +93,6 @@ self.addEventListener("fetch", (e) => {
     return;
   }
 
-  /* fonts: cache-first, they never change under the same URL */
-  if (isFont(url)) {
-    e.respondWith(
-      caches.match(request).then(
-        (hit) =>
-          hit ??
-          fetch(request).then((res) => {
-            const copy = res.clone();
-            caches.open(CACHE).then((c) => c.put(request, copy));
-            return res;
-          }),
-      ),
-    );
-    return;
-  }
 
   if (url.origin !== location.origin) return;
 
