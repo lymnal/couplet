@@ -14,6 +14,7 @@ import {
   describeGuess,
   SCORE_WORD,
   relativeAgo,
+  appendDuetLog,
   otherSlot,
   slotClass,
   hashStr,
@@ -1816,6 +1817,14 @@ function submitGuess() {
     /* only finished games count as used — an abandoned word was never seen */
     if (dd.status !== "playing" && !(st.duetUsed ?? []).includes(dd.answer))
       st.duetUsed = [...(st.duetUsed ?? []), dd.answer];
+    if (dd.status !== "playing")
+      st.duetLog = appendDuetLog(st.duetLog, {
+        d: dd.dateKey,
+        w: dd.answer,
+        n: dd.guesses.length,
+        won: dd.status === "won",
+        mode: dd.mode,
+      });
   });
   pendingFlipRow = state.duet.guesses.length - 1;
   renderDuet();
@@ -1842,6 +1851,59 @@ function submitGuess() {
         );
       }
     }, 1400);
+  }
+}
+
+/* the book of words: every finished Duet, newest first */
+const unseal = (s) => {
+  try {
+    return atob(s);
+  } catch {
+    return "?????";
+  }
+};
+function openWordBook() {
+  const log = state.duetLog ?? [];
+  const list = $("#wordbook");
+  list.textContent = "";
+  const got = log.filter((e) => e.won).length;
+  $("#words-summary").textContent = log.length
+    ? `${log.length} word${log.length > 1 ? "s" : ""} · ${got} got · newest first`
+    : "nothing yet — finish a Duet and it lands here";
+  for (const e of log) {
+    const li = document.createElement("li");
+    li.className = "wordbook-row " + (e.won ? "got" : "missed");
+    const word = document.createElement("b");
+    word.textContent = unseal(e.w).toUpperCase();
+    const meta = document.createElement("span");
+    const when = new Date(e.d + "T12:00:00").toLocaleDateString([], {
+      month: "short",
+      day: "numeric",
+    });
+    meta.textContent =
+      `${when} · ${e.won ? `in ${e.n}` : "missed"}` +
+      (e.mode === "free" ? " · free round" : "");
+    li.append(word, meta);
+    list.appendChild(li);
+  }
+  $("#words-modal").classList.remove("hidden");
+  $("#words-cancel").focus();
+}
+
+/* The QR is the door for two people at the same table — nobody types a
+   code across it. vendor/qrcode.js (MIT) draws it; the payload is our own
+   invite URL, so the markup it hands back is ours to trust. */
+function renderInviteQr(url) {
+  const wrap = $("#invite-qr");
+  wrap.textContent = "";
+  try {
+    const qr = window.qrcode(0, "M");
+    qr.addData(url);
+    qr.make();
+    wrap.innerHTML = qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true });
+  } catch (e) {
+    reportError("qr", e);
+    wrap.textContent = url;
   }
 }
 
@@ -2353,8 +2415,19 @@ function wire() {
     }
   });
 
-  $("#invite-btn").addEventListener("click", async () => {
-    const url = `${location.origin}${location.pathname}?room=${encodeURIComponent(room)}&as=${otherSlot(me.slot)}`;
+  const inviteUrl = () =>
+    `${location.origin}${location.pathname}?room=${encodeURIComponent(room)}&as=${otherSlot(me.slot)}`;
+  $("#invite-btn").addEventListener("click", () => {
+    $("#invite-code").textContent = room;
+    renderInviteQr(inviteUrl());
+    $("#invite-modal").classList.remove("hidden");
+    $("#invite-send").focus();
+  });
+  $("#invite-cancel").addEventListener("click", () =>
+    $("#invite-modal").classList.add("hidden"),
+  );
+  $("#invite-send").addEventListener("click", async () => {
+    const url = inviteUrl();
     const text = `Meet me in the parlor ♥`;
     if (navigator.share) {
       try {
@@ -2362,11 +2435,19 @@ function wire() {
       } catch {
         /* dismissed */
       }
-    } else {
+      return;
+    }
+    try {
       await navigator.clipboard.writeText(url);
       toast("link copied — text it over");
+    } catch {
+      toast("couldn't copy — let them scan the code instead");
     }
   });
+  $("#duet-book-btn").addEventListener("click", openWordBook);
+  $("#words-cancel").addEventListener("click", () =>
+    $("#words-modal").classList.add("hidden"),
+  );
   $("#install-go").addEventListener("click", async () => {
     if (!installPrompt) return;
     installPrompt.prompt();
@@ -2427,6 +2508,8 @@ function wire() {
     "name-modal": "#name-cancel",
     "delete-modal": "#delete-cancel",
     "note-modal": "#note-cancel",
+    "words-modal": "#words-cancel",
+    "invite-modal": "#invite-cancel",
   };
   document.addEventListener("keydown", (e) => {
     if (e.key !== "Escape") return;

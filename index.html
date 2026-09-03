@@ -216,6 +216,7 @@
 
     <div class="duet-footer">
       <span class="mode-tag" id="duet-mode-tag">daily</span>
+      <button class="ghost-btn" id="duet-book-btn">book of words</button>
       <button class="ghost-btn" id="duet-new-btn">another round</button>
     </div>
   </section>
@@ -361,6 +362,34 @@
   </div>
 </div>
 
+<!-- duet: the book of words -->
+<div class="modal-backdrop hidden" id="words-modal" role="dialog" aria-modal="true" aria-labelledby="words-title">
+  <div class="modal-card picker-card">
+    <p class="modal-eyebrow">duet</p>
+    <h2 class="modal-title" id="words-title">the book of words</h2>
+    <p class="picker-legend" id="words-summary"></p>
+    <ol class="wordbook" id="wordbook"></ol>
+    <div class="modal-actions">
+      <button class="ghost-btn" id="words-cancel">close</button>
+    </div>
+  </div>
+</div>
+
+<!-- invite: scan across the table, or send the link -->
+<div class="modal-backdrop hidden" id="invite-modal" role="dialog" aria-modal="true" aria-labelledby="invite-title">
+  <div class="modal-card">
+    <p class="modal-eyebrow">invite</p>
+    <h2 class="modal-title" id="invite-title">Meet me in the parlor</h2>
+    <div class="qr-wrap" id="invite-qr" role="img" aria-label="QR code that opens this parlor"></div>
+    <p class="modal-body">Sitting together? They scan it. Apart? Send the link.</p>
+    <p class="invite-code">code <b id="invite-code"></b></p>
+    <div class="modal-actions">
+      <button class="ghost-btn" id="invite-cancel">close</button>
+      <button class="submit-btn" id="invite-send">send the link</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-backdrop hidden" id="photo-modal" role="dialog" aria-modal="true" aria-label="your photo">
   <div class="modal-card">
     <p class="modal-eyebrow">your photo</p>
@@ -412,6 +441,7 @@
 <div class="float-layer" id="float-layer" aria-hidden="true"></div>
 
 <script src="vendor/supabase.js?v=8"></script>
+<script src="vendor/qrcode.js?v=8"></script>
 <script src="config.js?v=8"></script>
 <script src="puzzles.js?v=8"></script>
 <script src="spectrums.js?v=8"></script>

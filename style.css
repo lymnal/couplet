@@ -801,3 +801,18 @@ button, .key, .word-tile { touch-action: manipulation; }
   margin: 12px 0 4px; padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--radius);
   background: var(--ink-2); color: var(--linen-dim); font-size: 0.85rem; text-align: center;
 }
+
+/* ============ book of words & invite ============ */
+.wordbook { list-style: none; margin-top: 14px; display: flex; flex-direction: column; gap: 6px; text-align: left; }
+.wordbook-row {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 10px;
+  padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px;
+  background: var(--ink-2); font-size: 0.82rem; color: var(--linen-dim);
+}
+.wordbook-row b { font-family: "Fraunces", serif; font-size: 1.05rem; letter-spacing: 0.08em; color: var(--linen); }
+.wordbook-row.got b { color: var(--aqua-pale); }
+.wordbook-row.missed b { text-decoration: line-through; text-decoration-color: var(--danger); text-decoration-thickness: 1.5px; }
+.qr-wrap { width: min(60vw, 220px); margin: 14px auto 12px; padding: 10px; background: var(--linen); border-radius: 12px; }
+.qr-wrap svg { display: block; width: 100%; height: auto; }
+.invite-code { color: var(--linen-dim); font-size: 0.85rem; margin-top: 8px; }
+.invite-code b { font-family: "Fraunces", serif; letter-spacing: 0.1em; color: var(--linen); }

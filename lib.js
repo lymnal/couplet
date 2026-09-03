@@ -330,3 +330,13 @@ export function attuneShareCard(total, max, verdict, url) {
   const dial = "💚".repeat(lit) + "🖤".repeat(7 - lit);
   return `Couplet Attune — ${total}/${max} in tune, ${verdict} ♥\n${dial}\n${url}`;
 }
+
+/* ---------------- the book of words ----------------
+ * Every finished Duet, newest first, so the parlor remembers what it has
+ * guessed together. Capped, because the list lives inside the room doc and
+ * the room doc has a size limit. */
+export const DUET_LOG_CAP = 200;
+export function appendDuetLog(log, entry, cap = DUET_LOG_CAP) {
+  const prev = Array.isArray(log) ? log : [];
+  return [entry, ...prev].slice(0, cap);
+}

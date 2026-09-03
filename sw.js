@@ -18,6 +18,7 @@ const SHELL = [
   "./index.html",
   `./style.css?v=${ASSET_V}`,
   `./vendor/supabase.js?v=${ASSET_V}`,
+  `./vendor/qrcode.js?v=${ASSET_V}`,
   `./config.js?v=${ASSET_V}`,
   `./puzzles.js?v=${ASSET_V}`,
   `./spectrums.js?v=${ASSET_V}`,

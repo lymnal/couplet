@@ -32,6 +32,7 @@ import {
   relativeAgo,
   inkShareCard,
   attuneShareCard,
+  appendDuetLog,
 } from "./lib.js";
 
 test("otherSlot flips both ways", () => {
@@ -500,4 +501,16 @@ test("attune brag card lights the dial in proportion", () => {
   assert.match(card, /24\/28/);
   assert.match(card, /💚💚💚💚💚💚🖤/);
   assert.ok(attuneShareCard(0, 28, "beautiful strangers", "u").includes("🖤".repeat(7)));
+});
+
+test("the book of words is newest-first and capped", () => {
+  const e = (w) => ({ d: "2026-09-02", w, n: 3, won: true, mode: "daily" });
+  assert.deepEqual(appendDuetLog(undefined, e("a")), [e("a")]);
+  assert.deepEqual(appendDuetLog("junk", e("a")), [e("a")]);
+  assert.deepEqual(appendDuetLog([e("a")], e("b")).map((x) => x.w), ["b", "a"]);
+  const full = Array.from({ length: 3 }, (_, i) => e(String(i)));
+  const next = appendDuetLog(full, e("new"), 3);
+  assert.equal(next.length, 3);
+  assert.equal(next[0].w, "new");
+  assert.equal(next[2].w, "1");
 });
