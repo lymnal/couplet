@@ -188,9 +188,24 @@ function mutate(fn) {
   scheduleSave();
   renderAll();
 }
+/* Names arrive from the other phone through shared state, so they are
+   input: strings only, no longer than the join screen allows. Everything
+   that renders a name uses textContent, so this is belt and braces. */
+const NAME_MAX = 14;
+const tidyName = (n) =>
+  (typeof n === "string" ? n.trim().slice(0, NAME_MAX) : "") || null;
+function tidyPlayers(st) {
+  if (!st?.players || typeof st.players !== "object") return;
+  for (const s of ["A", "B"]) {
+    const t = tidyName(st.players[s]);
+    if (t) st.players[s] = t;
+    else delete st.players[s];
+  }
+}
 function applyRemote(incoming) {
   if (!incoming) return;
   if (shouldApplyRemote(state, incoming)) {
+    tidyPlayers(incoming);
     const prev = state;
     state = incoming;
     reactToRemote(prev, incoming);
@@ -1727,7 +1742,13 @@ function renderTangle() {
     const grp = puzzle().groups[f.g];
     const band = document.createElement("div");
     band.className = "band g" + f.g;
-    band.innerHTML = `<div class="band-title">${grp.title}</div><div class="band-words">${grp.words.join(" · ")}</div>`;
+    const title = document.createElement("div");
+    title.className = "band-title";
+    title.textContent = grp.title;
+    const words = document.createElement("div");
+    words.className = "band-words";
+    words.textContent = grp.words.join(" · ");
+    band.append(title, words);
     bands.appendChild(band);
   }
 
@@ -2075,7 +2096,12 @@ function wire() {
   });
   $("#photo-remove").addEventListener("click", async () => {
     $("#photo-modal").classList.add("hidden");
-    await supa.rpc("del_keepsake", { p_code: room, p_kind: "photo" });
+    const gone = await rpc(
+      "del_keepsake",
+      { p_code: room, p_kind: "photo" },
+      { queue: false },
+    );
+    if (!gone) return toast("couldn't remove it — check your signal");
     photoData = null;
     localStorage.removeItem(photoCacheKey());
     broadcast("photo", {});
@@ -2393,8 +2419,10 @@ async function fetchRoomRoster(code) {
     });
     const s = await r.json();
     const players = s?.players ?? {};
-    if (players.A) $("#label-a").textContent = players.A;
-    if (players.B) $("#label-b").textContent = players.B;
+    const a = tidyName(players.A);
+    const b = tidyName(players.B);
+    if (a) $("#label-a").textContent = a;
+    if (b) $("#label-b").textContent = b;
     if (!document.querySelector(".identity-btn.picked")) {
       if (players.A && !players.B)
         $('.identity-btn[data-slot="B"]').classList.add("picked");
@@ -2576,9 +2604,19 @@ function renderInklings() {
   prompt.textContent = inkCardText(ses.cards[idx], subject);
   const roles = document.createElement("p");
   roles.className = "ink-roles";
-  roles.innerHTML =
-    `<b class="role-${subject.toLowerCase()}">${slotName(subject)}</b> answers · ` +
-    `<b class="role-${otherSlot(subject).toLowerCase()}">${slotName(otherSlot(subject))}</b> guesses`;
+  /* names are partner-supplied text — build nodes, never markup */
+  const roleTag = (slot) => {
+    const b = document.createElement("b");
+    b.className = "role-" + slot.toLowerCase();
+    b.textContent = slotName(slot);
+    return b;
+  };
+  roles.append(
+    roleTag(subject),
+    " answers · ",
+    roleTag(otherSlot(subject)),
+    " guesses",
+  );
   card.append(prompt, roles);
 
   if (!bothIn) {
