@@ -22,7 +22,7 @@
 | **Attune** | One of you gets a secret dial position and writes a clue; the other reads their mind. Scored by closeness, not by winning. 100 spectrums. |
 | **Inklings** | "What would they order at 2am?" — you answer about yourself, they guess, answers stay sealed till both are in. 100 cards. |
 
-Every puzzle, prompt, and spectrum is hand-crafted — none of it is filler.
+Every puzzle, prompt, and spectrum is original — not scraped from anywhere, edited by hand, none of it filler.
 
 <p align="center">
   <img src="docs/shots/join.png"   width="24%" alt="The opening parlor — join or start one">

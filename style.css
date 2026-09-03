@@ -829,3 +829,6 @@ button, .key, .word-tile { touch-action: manipulation; }
 .deck-token { width: 100%; margin-top: 12px; font-size: 1.05rem; letter-spacing: 0.12em; }
 .decks-ask { margin-top: 18px; font-size: 0.85rem; }
 .decks-ask a { color: var(--aqua-pale); }
+
+/* the claim, quietly */
+.wordmark .tm { font-family: "Rubik", system-ui, sans-serif; font-style: normal; font-weight: 500; font-size: 0.28em; vertical-align: super; margin-left: 0.15em; -webkit-text-fill-color: var(--linen-dim); color: var(--linen-dim); letter-spacing: 0; }
