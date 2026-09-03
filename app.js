@@ -1824,7 +1824,9 @@ let tangleSel = new Set();
 let tangleSelBy = null;
 
 function ensureTangle() {
-  if (!state.tangle)
+  /* a deck can shrink the puzzle book under a game in progress — deal a
+     fresh one rather than render a puzzle that no longer exists */
+  if (!state.tangle || !PUZZLES[state.tangle.puzzleId])
     mutate((st) => {
       st.tangle = newTangleGame();
     });
