@@ -10,6 +10,8 @@ import {
   hashStr,
   prevDay,
   dayKeyFor,
+  LEGACY_TZ,
+  validTz,
   shouldApplyRemote,
   renderInkPrompt,
   ritualMap as libRitualMap,
@@ -81,7 +83,19 @@ const slotName = (s) =>
 const partnerName = () => state.players?.[otherSlot(me.slot)] ?? "your partner";
 
 /* ---------------- shared state ---------------- */
-const todayKey = () => dayKeyFor(new Date());
+/* Both phones must agree on which night it is, so the day boundary belongs
+   to the parlor, not the device: recorded from whoever makes the parlor and
+   kept in shared state. Parlors from before this field keep the legacy zone. */
+const deviceTz = () => {
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return validTz(tz) ? tz : LEGACY_TZ;
+  } catch {
+    return LEGACY_TZ;
+  }
+};
+const parlorTz = () => (validTz(state.tz) ? state.tz : LEGACY_TZ);
+const todayKey = () => dayKeyFor(new Date(), parlorTz());
 
 function freshState() {
   return {
@@ -89,6 +103,7 @@ function freshState() {
     updatedAt: new Date().toISOString(),
     by: null,
     players: {},
+    tz: deviceTz(),
     duet: null,
     tangle: null,
     stats: {
@@ -211,6 +226,7 @@ function applyRemote(incoming) {
     reactToRemote(prev, incoming);
     renderAll();
     ensureMyName();
+    ensureParlorTz();
   }
 }
 /* Publish my name into shared state so my partner sees it. Two guards keep
@@ -228,6 +244,17 @@ function ensureMyName() {
   lastNameWrite = performance.now();
   mutate((st) => {
     st.players = { ...(st.players ?? {}), [me.slot]: me.name };
+  });
+}
+/* older parlors have no zone on record; the first phone to open one on this
+   build claims its own, so the field exists for both from then on */
+let lastTzWrite = 0;
+function ensureParlorTz() {
+  if (!me.slot || validTz(state.tz) || slotDoubled) return;
+  if (performance.now() - lastTzWrite < 3000) return;
+  lastTzWrite = performance.now();
+  mutate((st) => {
+    st.tz = deviceTz();
   });
 }
 function scheduleSave() {
@@ -302,6 +329,7 @@ async function connect() {
   }
 
   ensureMyName();
+  ensureParlorTz();
   Promise.all([
     fetchRitual(),
     fetchPhoto(),

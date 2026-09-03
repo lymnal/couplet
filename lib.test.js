@@ -26,6 +26,7 @@ import {
   pickAttuneSpectrums,
   inkDealPool,
   duetStreakAfterWin,
+  validTz,
 } from "./lib.js";
 
 test("otherSlot flips both ways", () => {
@@ -38,6 +39,23 @@ test("dayKeyFor uses New York, not UTC", () => {
      still be the 5th, or Four Things lands on the wrong day */
   const ninePmEt = new Date("2026-08-06T01:30:00Z");
   assert.equal(dayKeyFor(ninePmEt), "2026-08-05");
+});
+
+test("dayKeyFor honors the parlor's own zone", () => {
+  /* the same instant is already the 6th in Tokyo */
+  const ninePmEt = new Date("2026-08-06T01:30:00Z");
+  assert.equal(dayKeyFor(ninePmEt, "Asia/Tokyo"), "2026-08-06");
+  assert.equal(dayKeyFor(ninePmEt, "Europe/London"), "2026-08-06");
+  assert.equal(dayKeyFor(ninePmEt, "America/Los_Angeles"), "2026-08-05");
+});
+
+test("validTz trusts only zones Intl can use", () => {
+  assert.equal(validTz("Asia/Tokyo"), true);
+  assert.equal(validTz("UTC"), true);
+  assert.equal(validTz("Mars/Olympus"), false);
+  assert.equal(validTz(""), false);
+  assert.equal(validTz(null), false);
+  assert.equal(validTz(42), false);
 });
 
 test("dayKeyFor holds through a DST change", () => {

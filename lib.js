@@ -10,10 +10,24 @@
 export const otherSlot = (s) => (s === "A" ? "B" : "A");
 export const slotClass = (s) => (s === "A" ? "p-a" : "p-b");
 
-/* the parlor's day starts in New York, not UTC — a 9pm ET entry must not
-   land on tomorrow's date */
-export const dayKeyFor = (date, tz = "America/New_York") =>
+/* The parlor's day starts in the parlor's own timezone, never UTC — a 9pm
+   entry must not land on tomorrow's date. The zone is recorded on the room
+   when it's made (see parlorTz in app.js); the default here is the zone the
+   app was born in, which parlors older than that field still use. */
+export const LEGACY_TZ = "America/New_York";
+export const dayKeyFor = (date, tz = LEGACY_TZ) =>
   new Intl.DateTimeFormat("en-CA", { timeZone: tz }).format(date);
+
+/* a zone string is only trusted if Intl can actually use it */
+export function validTz(tz) {
+  if (typeof tz !== "string" || !tz) return false;
+  try {
+    new Intl.DateTimeFormat("en-CA", { timeZone: tz });
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 /* noon UTC dodges every DST edge: shifting a date by ±12h can't change the
    calendar day */
