@@ -1,6 +1,8 @@
 {
+  "id": "couplet",
   "name": "Couplet",
   "short_name": "Couplet",
+  "scope": ".",
   "description": "Word games for two",
   "start_url": ".",
   "display": "standalone",
@@ -8,6 +10,7 @@
   "theme_color": "#191225",
   "icons": [
     { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "apple-touch-icon.png", "sizes": "180x180", "type": "image/png" },
     { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
     {
       "src": "icon-512.png",
