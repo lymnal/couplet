@@ -30,8 +30,9 @@ one present replaces that game's content entirely:
 | `inklings` | `["…@S…"]` | `@S` = who's answering about themselves, `@P` = who's guessing. Every card must mention `@S`. |
 | `spectrums` | `[["left", "right"]]` | `@A`/`@B` render as the two players' names. |
 | `fourLeads` | `["What four things …?"]` | The nightly prompt rotates through these. |
+| `duetAnswers` | `["STORM", "LATTE", …]` | Five letters a–z each, no repeats. Replaces the answer list; the shared guess dictionary still applies, plus these. A few dozen keeps the daily word fresh. |
 
-Duet's word list is shared by everyone and isn't deck-able (yet).
+Duet's *guess* dictionary is shared by everyone; its *answers* can be yours (`duetAnswers`).
 
 ## Rules of the road
 

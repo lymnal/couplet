@@ -190,7 +190,13 @@ export const renderInkPrompt = (template, subjectName, partnerName) =>
  * window globals, aliased at load) — so replacement must mutate IN PLACE,
  * never reassign. Absent or invalid keys fall back to the pristine
  * built-ins, so a partial deck (say, only inklings) is a valid deck. */
-export const DECK_KEYS = ["tangle", "inklings", "spectrums", "fourLeads"];
+export const DECK_KEYS = [
+  "tangle",
+  "inklings",
+  "spectrums",
+  "fourLeads",
+  "duetAnswers",
+];
 
 export function applyDeckContent(live, pristine, deck) {
   const custom = {};
@@ -237,6 +243,16 @@ export function validateDeck(deck) {
   for (const [i, lead] of (deck.fourLeads ?? []).entries())
     if (typeof lead !== "string" || !lead.trim())
       problems.push(`fourLeads[${i}]: must be a non-empty string`);
+  /* Duet answers: five letters a–z, no repeats. The shared guess dictionary
+     still applies, plus these — so a deck word outside it is still guessable. */
+  const seen = new Set();
+  for (const [i, w] of (deck.duetAnswers ?? []).entries()) {
+    const word = typeof w === "string" ? w.trim().toLowerCase() : "";
+    if (!/^[a-z]{5}$/.test(word))
+      problems.push(`duetAnswers[${i}]: must be five letters a–z`);
+    else if (seen.has(word)) problems.push(`duetAnswers[${i}]: "${word}" repeats`);
+    seen.add(word);
+  }
   return problems;
 }
 

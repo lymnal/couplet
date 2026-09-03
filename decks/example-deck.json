@@ -18,5 +18,6 @@
     ["First sip", "Last drop"],
     ["Dancing in the rain", "Watching from the window"]
   ],
-  "fourLeads": ["What four things steamed up the windows of today, pleasantly?"]
+  "fourLeads": ["What four things steamed up the windows of today, pleasantly?"],
+  "duetAnswers": ["LATTE", "STEAM", "CLOUD", "BREWS", "MISTY", "DRIPS", "NESTS"]
 }

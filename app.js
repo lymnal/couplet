@@ -140,11 +140,20 @@ function seededShuffle(n, seed) {
 }
 
 /* ---------------- game builders ---------------- */
+/* A deck can bring its own answers. Guesses still accept the shared
+   dictionary plus the deck's words, so a deck word outside the dictionary
+   is still guessable. */
+const deckAnswers = () =>
+  LIVE_CONTENT.duetAnswers.map((w) => String(w).trim().toLowerCase());
+const answerPool = () =>
+  LIVE_CONTENT.duetAnswers.length ? deckAnswers() : answerWords;
+const isGuessable = (w) => allowedWords.has(w) || deckAnswers().includes(w);
 function pickDuetAnswer(seed) {
+  const pool = answerPool();
   const used = new Set((state.duetUsed ?? []).map((b) => atob(b)));
   const current = state.duet ? atob(state.duet.answer) : null;
-  const start = Math.floor(mulberry32(seed)() * answerWords.length);
-  return pickUnusedWord(answerWords, used, current, start);
+  const start = Math.floor(mulberry32(seed)() * pool.length);
+  return pickUnusedWord(pool, used, current, start);
 }
 function newDuetGame(mode, round = 1) {
   const dateKey = todayKey();
@@ -1260,17 +1269,22 @@ const FOUR_LEADS = [
  * with no deck. Decks are immutable by convention: editing one means minting
  * a new id and re-pointing the room, which is what makes the localStorage
  * cache safe to trust offline. */
+/* Duet has no built-in deck slot — its answers come from words/answers.txt —
+   so the live array starts empty and an empty array means "use the list" */
+const DECK_DUET_ANSWERS = [];
 const LIVE_CONTENT = {
   tangle: PUZZLES,
   inklings: window.INKLINGS_DECK,
   spectrums: SPECTRUMS,
   fourLeads: FOUR_LEADS,
+  duetAnswers: DECK_DUET_ANSWERS,
 };
 const PRISTINE_CONTENT = {
   tangle: [...PUZZLES],
   inklings: [...window.INKLINGS_DECK],
   spectrums: [...SPECTRUMS],
   fourLeads: [...FOUR_LEADS],
+  duetAnswers: [],
 };
 let activeDeckId = null;
 
@@ -1732,7 +1746,7 @@ function pressKey(k) {
 }
 function submitSuggestion() {
   if (suggestTyped.length !== 5) return toast("five letters, love");
-  if (!allowedWords.has(suggestTyped)) return toast("not in our dictionary");
+  if (!isGuessable(suggestTyped)) return toast("not in our dictionary");
   broadcast("suggest", { w: suggestTyped });
   toast(`whispered to ${slotName(state.duet.turn)} ✨`);
   suggestTyped = "";
@@ -1741,7 +1755,7 @@ function submitSuggestion() {
 function submitGuess() {
   const d = state.duet;
   if (typed.length !== 5) return toast("five letters, love");
-  if (!allowedWords.has(typed)) {
+  if (!isGuessable(typed)) {
     $$("#duet-board .board-row")[d.guesses.length]?.classList.add("shake");
     return toast("not in our dictionary");
   }

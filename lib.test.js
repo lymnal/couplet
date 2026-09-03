@@ -315,12 +315,14 @@ const mkContent = () => {
     inklings: ["What's @S's usual?"],
     spectrums: [["Hot", "Cold"]],
     fourLeads: ["What four things?"],
+    duetAnswers: [],
   };
   const pristine = {
     tangle: [...live.tangle],
     inklings: [...live.inklings],
     spectrums: [...live.spectrums],
     fourLeads: [...live.fourLeads],
+    duetAnswers: [],
   };
   return { live, pristine };
 };
@@ -338,6 +340,7 @@ test("applyDeckContent replaces in place and keeps array identity", () => {
     inklings: true,
     spectrums: false,
     fourLeads: false,
+    duetAnswers: false,
   });
 });
 
@@ -425,4 +428,23 @@ test("tangleShareCard renders solve order in the connections palette", () => {
   assert.ok(card.includes("💜💜💜💜\n💛💛💛💛\n💚💚💚💚\n💙💙💙💙"));
   assert.ok(tangleShareCard([0], 1, 1, "u").includes("1 miss ♥"));
   assert.ok(tangleShareCard([0], 2, 1, "u").includes("2 misses"));
+});
+
+test("validateDeck checks duet answers: five letters, no repeats", () => {
+  assert.deepEqual(validateDeck({ duetAnswers: ["latte", "STEAM"] }), []);
+  const bad = validateDeck({ duetAnswers: ["four", "latte", "Latte", 5, "café1"] });
+  assert.equal(bad.length, 4);
+  assert.match(bad[0], /duetAnswers\[0\]/);
+  assert.match(bad[1], /repeats/);
+});
+
+test("applyDeckContent installs duet answers and clears them without a deck", () => {
+  const { live, pristine } = mkContent();
+  const ref = live.duetAnswers;
+  const custom = applyDeckContent(live, pristine, { duetAnswers: ["storm"] });
+  assert.equal(live.duetAnswers, ref);
+  assert.deepEqual(live.duetAnswers, ["storm"]);
+  assert.equal(custom.duetAnswers, true);
+  applyDeckContent(live, pristine, null);
+  assert.deepEqual(live.duetAnswers, []);
 });
