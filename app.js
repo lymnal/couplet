@@ -1482,7 +1482,18 @@ function renderDuetPill() {
   } else pill.textContent = `${slotName(state.duet.turn)}'s turn…`;
 }
 function renderDuet() {
-  if (!answerWords || !me.slot) return;
+  if (!me.slot) return;
+  if (!answerWords) {
+    const pill = $("#turn-pill");
+    pill.className = "turn-pill";
+    pill.textContent = "fetching the dictionary…";
+    loadWords().then((ok) => {
+      if (screenNow !== "duet") return;
+      if (ok) renderDuet();
+      else pill.textContent = "no dictionary yet — check your signal and reopen Duet";
+    });
+    return;
+  }
   ensureDuet();
   const d = state.duet;
   const answer = duetAnswer();
@@ -1623,7 +1634,7 @@ function renderKeyboard() {
 }
 function pressKey(k) {
   const d = state.duet;
-  if (d.status !== "playing") return;
+  if (!d || !allowedWords || d.status !== "playing") return;
   if (!myTurn()) {
     // whisper mode: the waiting player drafts a suggestion
     if (k === "back") suggestTyped = suggestTyped.slice(0, -1);
@@ -2024,6 +2035,7 @@ function wire() {
     else if (/^[a-zA-Z]$/.test(e.key)) pressKey(e.key.toLowerCase());
   });
   $("#duet-new-btn").addEventListener("click", () => {
+    if (!answerWords) return toast("still fetching the dictionary…");
     typed = "";
     ghostLetters = "";
     mutate((st) => {
@@ -2260,20 +2272,41 @@ function wire() {
 }
 
 /* ---------------- boot ---------------- */
-async function loadWords() {
-  const [allowedTxt, answersTxt] = await Promise.all([
-    fetch("words/allowed.txt").then((r) => r.text()),
-    fetch("words/answers.txt").then((r) => r.text()),
-  ]);
-  answerWords = answersTxt
-    .split("\n")
-    .map((w) => w.trim())
-    .filter((w) => w.length === 5);
-  allowedWords = new Set(
-    [...allowedTxt.split("\n").map((w) => w.trim()), ...answerWords].filter(
-      (w) => w.length === 5,
-    ),
-  );
+/* The word lists are the one thing Duet can't play without. They sit in the
+   service-worker shell after the first visit, but that first visit on a
+   flaky connection used to throw here and strand the app on the join
+   screen. Now a failed fetch is reported, the parlor opens anyway, and Duet
+   retries when it's opened. */
+let wordsLoading = null;
+function loadWords() {
+  if (answerWords) return Promise.resolve(true);
+  const text = (r) =>
+    r.ok ? r.text() : Promise.reject(new Error(`words ${r.status}`));
+  wordsLoading ??= (async () => {
+    try {
+      const [allowedTxt, answersTxt] = await Promise.all([
+        fetch("words/allowed.txt").then(text),
+        fetch("words/answers.txt").then(text),
+      ]);
+      const answers = answersTxt
+        .split("\n")
+        .map((w) => w.trim())
+        .filter((w) => w.length === 5);
+      allowedWords = new Set(
+        [...allowedTxt.split("\n").map((w) => w.trim()), ...answers].filter(
+          (w) => w.length === 5,
+        ),
+      );
+      answerWords = answers;
+      return true;
+    } catch (e) {
+      reportError("words", e);
+      return false;
+    } finally {
+      wordsLoading = null;
+    }
+  })();
+  return wordsLoading;
 }
 async function enterParlor() {
   /* the code is the only credential there is, so it must not sit in the
