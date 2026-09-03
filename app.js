@@ -34,7 +34,7 @@ import {
   pickAttuneSpectrums,
   inkDealPool,
   duetStreakAfterWin,
-} from "./lib.js?v=7";
+} from "./lib.js?v=8";
 
 const CFG = window.COUPLET_CONFIG;
 /* vendored UMD build (vendor/supabase.js, pinned 2.112.4) — a CDN module
@@ -43,7 +43,7 @@ const CFG = window.COUPLET_CONFIG;
 const { createClient } = window.supabase;
 const PUZZLES = window.TANGLE_PUZZLES;
 /* asset version — ./bump.sh keeps this in step with index.html and sw.js */
-const ASSET_VERSION = "7";
+const ASSET_VERSION = "8";
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => [...document.querySelectorAll(sel)];
 
