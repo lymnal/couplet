@@ -321,6 +321,13 @@ function reactToRemote(prev, next) {
     suggestTyped = "";
     pendingFlipRow = next.duet.guesses.length - 1;
   }
+  /* the ending belongs to both phones — the one that didn't type the last
+     word used to get a quiet pill while the other got confetti */
+  const ended =
+    next.duet && prev.duet?.status === "playing" && next.duet.status !== "playing";
+  if (ended && screenNow === "duet") setTimeout(announceDuetResult, 1400);
+  else if (ended && next.duet.status === "won")
+    toast(`💚 ${slotName(next.by)} got the word — “${unseal(next.duet.answer).toUpperCase()}”`);
 }
 
 /* ---------------- supabase wiring ---------------- */
@@ -1836,29 +1843,32 @@ function submitGuess() {
   });
   pendingFlipRow = state.duet.guesses.length - 1;
   renderDuet();
-  const status = state.duet.status;
-  if (status !== "playing") {
-    setTimeout(() => {
-      if (status === "won") {
-        celebrate();
-        openModal(
-          "duet",
-          "You two ✨",
-          `“${duetAnswer().toUpperCase()}” in ${state.duet.guesses.length} — streak ${state.stats.streak} ♥\n${winLine()}`,
-          duetShareCard(
-            state.duet.guesses.map((g) => scoreGuess(g.w, duetAnswer())),
-            state.stats.streak,
-            location.origin + location.pathname,
-          ),
-        );
-      } else {
-        openModal(
-          "duet",
-          "So close",
-          `It was “${duetAnswer().toUpperCase()}”.\nTomorrow's word is already waiting.`,
-        );
-      }
-    }, 1400);
+  if (state.duet.status !== "playing") setTimeout(announceDuetResult, 1400);
+}
+
+/* the ending, once per game, on whichever phone is looking */
+function announceDuetResult() {
+  const d = state.duet;
+  if (!d || d.status === "playing" || screenNow !== "duet") return;
+  if (modalShownFor(`duet-${d.dateKey}-${d.round}-${d.status}`)) return;
+  if (d.status === "won") {
+    celebrate();
+    openModal(
+      "duet",
+      "You two ✨",
+      `“${duetAnswer().toUpperCase()}” in ${d.guesses.length} — streak ${state.stats.streak} ♥\n${winLine()}`,
+      duetShareCard(
+        d.guesses.map((g) => scoreGuess(g.w, duetAnswer())),
+        state.stats.streak,
+        location.origin + location.pathname,
+      ),
+    );
+  } else {
+    openModal(
+      "duet",
+      "So close",
+      `It was “${duetAnswer().toUpperCase()}”.\nTomorrow's word is already waiting.`,
+    );
   }
 }
 
