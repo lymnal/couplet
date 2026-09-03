@@ -252,7 +252,11 @@ function applyRemote(incoming) {
    never more than once per few seconds. Retrying otherwise is deliberate —
    a rename that silently fails to propagate leaves me seeing my new name
    while my partner still sees the old one. */
-let lastNameWrite = 0;
+/* -Infinity, not 0: performance.now() is still under the rate limit when
+   connect() first runs, and a zero here silently skipped the first write —
+   a fresh parlor showed "your partner" instead of a name until some later
+   event happened to retry */
+let lastNameWrite = -Infinity;
 function ensureMyName() {
   if (!me.name || !me.slot) return;
   if (state.players?.[me.slot] === me.name) return;
@@ -265,7 +269,7 @@ function ensureMyName() {
 }
 /* older parlors have no zone on record; the first phone to open one on this
    build claims its own, so the field exists for both from then on */
-let lastTzWrite = 0;
+let lastTzWrite = -Infinity;
 function ensureParlorTz() {
   if (!me.slot || validTz(state.tz) || slotDoubled) return;
   if (performance.now() - lastTzWrite < 3000) return;
