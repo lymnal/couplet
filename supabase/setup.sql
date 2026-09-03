@@ -61,16 +61,48 @@ as $$
   select state from public.rooms where code = upper(p_code);
 $$;
 
-create or replace function public.set_room(p_code text, p_state jsonb)
-returns void language plpgsql security definer set search_path = public as $$
-declare c text := assert_code(p_code);
+-- Last-write-wins, enforced where it matters (added 2026-09-02). The client
+-- already decides which of two competing docs survives — higher rev, then
+-- newer updatedAt — but an unconditional upsert let a phone that woke up
+-- holding a stale copy overwrite newer play. Now the row only changes when
+-- the incoming doc would win by the same rule, and whatever is stored
+-- afterwards is returned so the writer can adopt it.
+create or replace function public.put_room(p_code text, p_state jsonb)
+returns jsonb language plpgsql security definer set search_path = public as $$
+declare
+  c text := assert_code(p_code);
+  cur jsonb;
+  new_rev numeric;
+  cur_rev numeric;
 begin
+  if p_state is null or jsonb_typeof(p_state) <> 'object' then
+    raise exception 'room state must be an object';
+  end if;
   if length(p_state::text) > 65536 then
     raise exception 'room state too large: % bytes (max 65536)', length(p_state::text);
   end if;
-  insert into public.rooms (code, state, updated_at)
-  values (c, p_state, now())
-  on conflict (code) do update set state = excluded.state, updated_at = now();
+  new_rev := coalesce((p_state->>'rev')::numeric, 0);
+  select state into cur from public.rooms where code = c for update;
+  if not found then
+    insert into public.rooms (code, state, updated_at) values (c, p_state, now());
+    return p_state;
+  end if;
+  cur_rev := coalesce((cur->>'rev')::numeric, 0);
+  if new_rev > cur_rev
+     or (new_rev = cur_rev
+         and coalesce(p_state->>'updatedAt', '') > coalesce(cur->>'updatedAt', '')) then
+    update public.rooms set state = p_state, updated_at = now() where code = c;
+    return p_state;
+  end if;
+  return cur;
+end;
+$$;
+
+-- Kept for clients still running an older build: same rule, no return value.
+create or replace function public.set_room(p_code text, p_state jsonb)
+returns void language plpgsql security definer set search_path = public as $$
+begin
+  perform public.put_room(p_code, p_state);
 end;
 $$;
 
@@ -139,6 +171,7 @@ $$;
 
 grant execute on function
   public.get_room(text),
+  public.put_room(text, jsonb),
   public.set_room(text, jsonb),
   public.get_four(text),
   public.save_four(text, date, text, jsonb),

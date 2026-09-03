@@ -232,11 +232,25 @@ function ensureMyName() {
 }
 function scheduleSave() {
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => {
-    /* not queued: the room doc is last-write-wins, so replaying a stale
-       snapshot later would undo newer play. Broadcast + next save covers it. */
-    rpc("set_room", { p_code: room, p_state: state }, { queue: false });
-  }, 700);
+  saveTimer = setTimeout(saveRoom, 700);
+}
+/* Not queued: the room doc is last-write-wins, so replaying a stale snapshot
+   later would undo newer play. The backend applies the same rev-then-clock
+   rule the client does and hands back whatever won — so a phone that woke
+   up holding an old copy adopts the newer one instead of overwriting it. */
+async function saveRoom() {
+  const snapshot = state;
+  try {
+    const { data, error } = await supa.rpc("put_room", {
+      p_code: room,
+      p_state: snapshot,
+    });
+    if (error) throw error;
+    reportOk();
+    if (data) applyRemote(data);
+  } catch (err) {
+    reportError("rpc:put_room", err);
+  }
 }
 function broadcast(event, payload) {
   channel?.send({
@@ -272,7 +286,16 @@ async function connect() {
     const { data, error } = await supa.rpc("get_room", { p_code: room });
     if (error) throw error;
     if (data) applyRemote(data);
-    else await supa.rpc("set_room", { p_code: room, p_state: state });
+    else {
+      /* a brand-new parlor — or one the other phone made a moment ago;
+         put_room returns whichever it turns out to be */
+      const { data: stored, error: putErr } = await supa.rpc("put_room", {
+        p_code: room,
+        p_state: state,
+      });
+      if (putErr) throw putErr;
+      if (stored) applyRemote(stored);
+    }
     reportOk();
   } catch (e) {
     reportError("connect", e);
