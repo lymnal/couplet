@@ -645,7 +645,7 @@ function renderNotes() {
 /* The photo is a ~400KB data URL living in Postgres, and it was re-downloaded
    on every single app open — the slowest thing in the experience on cellular.
    Check a 34-byte timestamp first and reuse the local copy when unchanged. */
-const photoCacheKey = () => `tg_photo_${room}`;
+const photoCacheKey = () => `couplet_photo::${room}`;
 function readPhotoCache() {
   try {
     return JSON.parse(localStorage.getItem(photoCacheKey()) ?? "null");
@@ -1333,7 +1333,7 @@ function renderRitual() {
   wrap.appendChild(date);
 
   if (mine && theirs) {
-    const seenKey = `tg_reveal_${room}_${today}`;
+    const seenKey = `couplet_reveal::${room}::${today}`;
     if (!localStorage.getItem(seenKey)) {
       localStorage.setItem(seenKey, "1");
       celebrate();
@@ -1905,9 +1905,9 @@ function celebrate() {
 /* ---------------- toast & modal ---------------- */
 const WIN_LINES = [
   "Tell each other four grateful things tonight ♥",
-  "This calls for soba.",
-  "Dia Beacon energy ✨",
-  "Next stop: another museum date",
+  "This calls for dessert.",
+  "Main-character energy ✨",
+  "Next stop: another date night",
   "Celebrate with a movie night 🍿",
   "You'd survive a rom-com montage",
   "Somewhere a lavender field approves",
