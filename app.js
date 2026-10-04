@@ -3335,6 +3335,11 @@ function renderAll() {
   const roomParam = params.get("room");
   const asParam = params.get("as");
   $("#room-input").value = roomParam ?? store.room ?? randomRoom();
+  /* arriving by an invite link: the code is already theirs, so the
+     start-or-join hint would tell them to replace the right code */
+  if (roomParam)
+    $(".room-hint").textContent =
+      "This is the code your person sent. Tap your glow to join.";
   /* the field arrives prefilled with a fresh code, which is right for the
      person starting a parlor — but their partner arrives to TYPE a code, and
      appending to the suggestion strands them alone in a mistyped room.
