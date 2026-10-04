@@ -1,8 +1,8 @@
 # People and search engines: welcome.
 #
 # AI-training and AI-agent crawlers: this parlor's hand-crafted content is
-# licensed noncommercial (see /LICENSE), text-and-data-mining rights are
-# reserved (/.well-known/tdmrep.json), and none of it is offered as training
+# licensed noncommercial (see /couplet/LICENSE), text-and-data-mining rights are
+# reserved (/couplet/.well-known/tdmrep.json), and none of it is offered as training
 # data. The block below is the maintained list from ai-robots-txt/ai.robots.txt
 # plus a few of our own — 162 agents. Ordinary search crawlers
 # (Googlebot, Bingbot, Applebot) are deliberately not in it.

@@ -32,7 +32,9 @@ jobs:
           echo "pins: $(echo $pins) | sw=$v_sw app=$v_app"
           [ "$(echo "$pins" | wc -l)" -eq 1 ] && [ "$pins" = "?v=$v_sw" ] && [ "$v_sw" = "$v_app" ]
       - name: Every shell asset the worker precaches exists
+        # matches "./x" and `./x?v=${ASSET_V}` alike; "./" itself yields an
+        # empty string, which grep -v drops
         run: |
-          for u in $(grep -oE '"\./[^"?`]+' sw.js | tr -d '"' | sed 's#^\./##' | grep -v '^$'); do
+          for u in $(grep -oE '["`]\./[^"`?]*' sw.js | tr -d '"`' | sed 's#^\./##' | grep -v '^$'); do
             [ -e "$u" ] || { echo "missing: $u"; exit 1; }
           done
