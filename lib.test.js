@@ -39,6 +39,10 @@ import {
   parlorReview,
   reviewShareCard,
   bookOfNightsText,
+  QUEUE_MAX,
+  queueKey,
+  enqueue,
+  settleQueue,
 } from "./lib.js";
 
 test("otherSlot flips both ways", () => {
@@ -645,4 +649,39 @@ test("sw: offline, a visited page serves itself and anything else gets the shell
   await nav("./?room=ABCDEFGH");
   assert.equal(await nav("privacy.html", 0), "privacy.html");
   assert.equal(await nav("trailer.html", 0), "./?room=ABCDEFGH");
+});
+
+/* ---- the offline queue ----
+ * A flush awaits each saved write in turn, and a write that fails meanwhile
+ * is appended to the same queue. Settling must remove only what went
+ * through, never whatever arrived while it was busy. */
+const qItem = (id, fn = "add_note") => ({ id, fn, args: { p_id: id }, at: 1 });
+
+test("settleQueue keeps items enqueued during a flush", () => {
+  const snapshot = [qItem("a"), qItem("b")];
+  const succeeded = snapshot.map(queueKey);
+  const now = enqueue(snapshot, qItem("c")); // saved while the flush ran
+  assert.deepEqual(settleQueue(now, succeeded), [qItem("c")]);
+});
+
+test("settleQueue removes only succeeded items", () => {
+  const q = [qItem("a"), qItem("b"), qItem("c")];
+  assert.deepEqual(settleQueue(q, [queueKey(q[1])]), [qItem("a"), qItem("c")]);
+  assert.deepEqual(settleQueue(q, []), q);
+});
+
+test("queueKey falls back for legacy items without id", () => {
+  const legacy = { fn: "put_ritual", args: { p_day: "2026-10-01" }, at: 1759300000000 };
+  assert.equal(queueKey(legacy), '1759300000000|put_ritual|{"p_day":"2026-10-01"}');
+  assert.equal(queueKey(qItem("x")), "x");
+  assert.deepEqual(settleQueue([legacy, qItem("x")], [queueKey(legacy)]), [qItem("x")]);
+});
+
+test("enqueue caps the queue at 50 keeping the newest", () => {
+  assert.equal(QUEUE_MAX, 50);
+  let q = [];
+  for (let i = 0; i < 60; i++) q = enqueue(q, qItem(String(i)));
+  assert.equal(q.length, 50);
+  assert.equal(q[0].id, "10");
+  assert.equal(q.at(-1).id, "59");
 });

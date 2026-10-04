@@ -420,3 +420,16 @@ export function bookOfNightsText(rows, names) {
   }
   return out.join("\n");
 }
+
+/* The offline queue (see rpc/flushQueue in app.js). A flush awaits each
+   saved write in turn, and a write that fails meanwhile is appended to the
+   same queue, so settling removes only what went through — never whatever
+   arrived while the flush was busy. Items saved before ids existed are keyed
+   by when, what and with which arguments. */
+export const QUEUE_MAX = 50;
+export const queueKey = (i) => i.id ?? `${i.at}|${i.fn}|${JSON.stringify(i.args)}`;
+export const enqueue = (q, item) => [...q, item].slice(-QUEUE_MAX);
+export function settleQueue(current, succeededKeys) {
+  const done = new Set(succeededKeys);
+  return current.filter((i) => !done.has(queueKey(i)));
+}

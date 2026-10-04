@@ -38,6 +38,10 @@ import {
   pickAttuneSpectrums,
   inkDealPool,
   duetStreakAfterWin,
+  QUEUE_MAX,
+  queueKey,
+  enqueue,
+  settleQueue,
 } from "./lib.js?v=18";
 
 const CFG = window.COUPLET_CONFIG;
@@ -2854,7 +2858,7 @@ const readQueue = () => {
 };
 const writeQueue = (q) => {
   try {
-    localStorage.setItem(QUEUE_KEY, JSON.stringify(q.slice(-50)));
+    localStorage.setItem(QUEUE_KEY, JSON.stringify(q.slice(-QUEUE_MAX)));
   } catch {
     /* storage full — dropping the queue beats bricking the app */
   }
@@ -2870,33 +2874,51 @@ async function rpc(fn, args, { queue = true } = {}) {
   } catch (err) {
     reportError(`rpc:${fn}`, err);
     if (queue) {
-      writeQueue([...readQueue(), { fn, args, at: Date.now() }]);
+      writeQueue(
+        enqueue(readQueue(), {
+          id: crypto.randomUUID?.() ?? `${Date.now()}-${Math.random()}`,
+          fn,
+          args,
+          at: Date.now(),
+        }),
+      );
       toast("saved on this phone — will sync when you're back online");
     }
     return false;
   }
 }
 
-async function flushQueue() {
-  const q = readQueue();
-  if (!q.length || !supa) return;
-  const left = [];
-  for (const item of q) {
-    try {
-      const { error } = await supa.rpc(item.fn, item.args);
-      if (error) throw error;
-    } catch {
-      left.push(item);
+/* one flush at a time: the 'online' event and entering the parlor can both
+   start one, and two running together would replay the same writes twice */
+let flushing = null;
+function flushQueue() {
+  if (flushing) return flushing;
+  flushing = (async () => {
+    const q = readQueue();
+    if (!q.length || !supa) return;
+    const succeeded = [];
+    for (const item of q) {
+      try {
+        const { error } = await supa.rpc(item.fn, item.args);
+        if (error) throw error;
+        succeeded.push(queueKey(item));
+      } catch {
+        /* stays queued for the next flush */
+      }
     }
-  }
-  writeQueue(left);
-  if (left.length < q.length) {
-    await Promise.all([fetchRitual(), fetchInklings()]);
-    renderAll();
-    toast(
-      `synced ${q.length - left.length} saved change${q.length - left.length > 1 ? "s" : ""} ✦`,
-    );
-  }
+    /* re-read: rpc() may have queued more while this loop was awaiting */
+    writeQueue(settleQueue(readQueue(), succeeded));
+    if (succeeded.length) {
+      await Promise.all([fetchRitual(), fetchInklings()]);
+      renderAll();
+      toast(
+        `synced ${succeeded.length} saved change${succeeded.length > 1 ? "s" : ""} ✦`,
+      );
+    }
+  })().finally(() => {
+    flushing = null;
+  });
+  return flushing;
 }
 addEventListener("online", flushQueue);
 
