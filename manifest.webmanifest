@@ -3,7 +3,7 @@
   "name": "Couplet",
   "short_name": "Couplet",
   "scope": ".",
-  "description": "Word games for two",
+  "description": "Five little games for exactly two people. No accounts, no feed.",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#191225",

@@ -2,7 +2,7 @@
   <img src="og.png" alt="Couplet — word games for two" width="640">
 </p>
 
-<h3 align="center">Five word games for exactly two people — a couple, two best friends, siblings, a parent and a kid who moved away.</h3>
+<h3 align="center">Five little games for exactly two people — a couple, two best friends, siblings, a parent and a kid who moved away.</h3>
 <p align="center">
   Open the link. Text it to your person. Play.<br>
   No accounts, no feed, no app store — just you two in a little parlor.
@@ -16,7 +16,7 @@
 
 | | |
 |---|---|
-| **Duet** | Wordle, but you alternate letters on the same board. 1,500 answers, 15,369 accepted guesses. |
+| **Duet** | Wordle, but you take turns guessing on the same board. 1,500 answers, 15,369 accepted guesses. |
 | **Tangle** | Sort 16 words into 4 groups — 100 original puzzles, none borrowed from the NYT. |
 | **Four Things** | A nightly gratitude ritual. Each of you writes four things; they stay **sealed until you both share**. 100 rotating prompts. |
 | **Attune** | One of you gets a secret dial position and writes a clue; the other reads their mind. Scored by closeness, not by winning. 100 spectrums. |
@@ -67,6 +67,9 @@ The work that took the longest is the work you can't see:
   page asks for another.
 - **Sealed simultaneous reveals.** Four Things and Inklings hide both answers
   until both are submitted — the small mechanic that makes honesty cheap.
+  The seal is on screen, not cryptographic: the server hands both entries to
+  each phone, so a partner with devtools could peek early. Sealing it
+  server-side needs a schema change.
 - **Last-write-wins, enforced twice.** Each phone decides which of two
   competing snapshots survives (revision, then clock), and the database applies
   the same rule before accepting a write — so a phone that wakes from a night
@@ -105,7 +108,8 @@ itself, two browsers in one live parlor. [portrait](https://github.com/lymnal/co
 
 I built it for my partner and me, and it is deliberately not a startup: no
 accounts because there's nothing to sign up for, no feed because there's no one
-else to see, no analytics because I already know both users. Every design
+else to see, no analytics, because I built it for two people I already knew
+and kept it that way when it went public. Every design
 decision follows from the population being exactly two.
 
 ## License
@@ -115,5 +119,5 @@ for the two of you; just don't commercialize it or its content.
 The name and the parlor's look identify this project. None of it is offered
 as AI training data: the license says so, text-and-data-mining rights are
 reserved machine-readably (`/.well-known/tdmrep.json`, `noai`, `ai.txt`), and
-`robots.txt` turns away 180-odd AI crawlers. Those are legal and advisory
+`robots.txt` turns away 160-odd AI crawlers. Those are legal and advisory
 fences, not walls — public code is readable by anything that can read.
