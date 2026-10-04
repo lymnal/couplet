@@ -585,7 +585,7 @@ body {
 .key.wide { max-width: 64px; flex: 1.6; font-size: 0.75rem; }
 .key.st-g { background: var(--moss); color: #0e2416; }
 .key.st-y { background: var(--brass); color: #2a2208; }
-.key.st-x { background: var(--absent); color: var(--linen-dim); opacity: 0.85; }
+.key.st-x { background: var(--absent); color: var(--linen-dim); opacity: 0.95; } /* 4.68:1 on ink; 0.85 was 4.14:1 */
 .keyboard.locked { opacity: 0.45; pointer-events: none; }
 
 .duet-footer {
