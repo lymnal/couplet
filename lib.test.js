@@ -45,6 +45,7 @@ import {
   settleQueue,
   KEEPSAKE_MAX,
   randomRoom,
+  serialRunner,
 } from "./lib.js";
 
 test("otherSlot flips both ways", () => {
@@ -708,4 +709,63 @@ test("randomRoom rejects bytes >= 248", () => {
 test("the photo cap matches the server's keepsake limit", () => {
   const sql = readFileSync(new URL("./supabase/setup.sql", import.meta.url), "utf8");
   assert.equal(KEEPSAKE_MAX, Number(sql.match(/length\(p_data\) > (\d+)/)[1]));
+});
+
+/* ---- one flush at a time, and nothing left waiting ----
+ * flushQueue is wrapped in serialRunner: a call while a flush is running
+ * must not start a second copy, but it must not be dropped either, or a
+ * write queued during the flush waits until the app is opened again. */
+const tick = () => new Promise((r) => setImmediate(r));
+function gatedTask() {
+  const gates = [];
+  let runs = 0;
+  const task = () => {
+    runs++;
+    return new Promise((res, rej) => gates.push({ res, rej }));
+  };
+  return { task, gates, runs: () => runs };
+}
+
+test("serialRunner coalesces calls made mid-run into one re-run", async () => {
+  const g = gatedTask();
+  const run = serialRunner(g.task);
+  const first = run();
+  assert.equal(run(), first); // mid-run calls share the running promise
+  run();
+  await tick();
+  assert.equal(g.runs(), 1);
+  g.gates[0].res();
+  await first;
+  await tick();
+  assert.equal(g.runs(), 2); // exactly one re-run for both mid-run calls
+  g.gates[1].res();
+  await tick();
+  assert.equal(g.runs(), 2);
+});
+
+test("serialRunner runs once when nothing arrives mid-run", async () => {
+  const g = gatedTask();
+  const run = serialRunner(g.task);
+  const p = run();
+  await tick();
+  g.gates[0].res();
+  await p;
+  await tick();
+  assert.equal(g.runs(), 1);
+  run(); // a later call starts a fresh run
+  await tick();
+  assert.equal(g.runs(), 2);
+});
+
+test("serialRunner re-runs even when the run fails", async () => {
+  const g = gatedTask();
+  const run = serialRunner(g.task);
+  const p = run();
+  run();
+  await tick();
+  g.gates[0].rej(new Error("network"));
+  await assert.rejects(p, /network/);
+  await tick();
+  assert.equal(g.runs(), 2);
+  g.gates[1].res();
 });

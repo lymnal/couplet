@@ -44,6 +44,7 @@ import {
   settleQueue,
   KEEPSAKE_MAX,
   randomRoom,
+  serialRunner,
 } from "./lib.js?v=19";
 
 const CFG = window.COUPLET_CONFIG;
@@ -2896,38 +2897,39 @@ async function rpc(fn, args, { queue = true } = {}) {
   }
 }
 
-/* one flush at a time: the 'online' event and entering the parlor can both
-   start one, and two running together would replay the same writes twice */
-let flushing = null;
-function flushQueue() {
-  if (flushing) return flushing;
-  flushing = (async () => {
-    const q = readQueue();
-    if (!q.length || !supa) return;
-    const succeeded = [];
-    for (const item of q) {
-      try {
-        const { error } = await supa.rpc(item.fn, item.args);
-        if (error) throw error;
-        succeeded.push(queueKey(item));
-      } catch {
-        /* stays queued for the next flush */
-      }
+/* one flushing pass at a time: the 'online' event and entering the parlor
+   can both start one, and two running together would replay the same writes
+   twice. A call during a pass books one more pass (serialRunner), and each
+   saved write gets FLUSH_RPC_TIMEOUT_MS, so a hung request can't hold the
+   queue until the app is next opened. */
+const FLUSH_RPC_TIMEOUT_MS = 15000;
+const flushQueue = serialRunner(async () => {
+  const q = readQueue();
+  if (!q.length || !supa) return;
+  const succeeded = [];
+  for (const item of q) {
+    try {
+      /* AbortSignal.timeout is missing on older Safari; without it the call
+         simply runs unbounded, as before */
+      const { error } = await supa
+        .rpc(item.fn, item.args)
+        .abortSignal(AbortSignal.timeout?.(FLUSH_RPC_TIMEOUT_MS));
+      if (error) throw error;
+      succeeded.push(queueKey(item));
+    } catch {
+      /* stays queued for the next pass */
     }
-    /* re-read: rpc() may have queued more while this loop was awaiting */
-    writeQueue(settleQueue(readQueue(), succeeded));
-    if (succeeded.length) {
-      await Promise.all([fetchRitual(), fetchInklings()]);
-      renderAll();
-      toast(
-        `synced ${succeeded.length} saved change${succeeded.length > 1 ? "s" : ""} ✦`,
-      );
-    }
-  })().finally(() => {
-    flushing = null;
-  });
-  return flushing;
-}
+  }
+  /* re-read: rpc() may have queued more while this loop was awaiting */
+  writeQueue(settleQueue(readQueue(), succeeded));
+  if (succeeded.length) {
+    await Promise.all([fetchRitual(), fetchInklings()]);
+    renderAll();
+    toast(
+      `synced ${succeeded.length} saved change${succeeded.length > 1 ? "s" : ""} ✦`,
+    );
+  }
+});
 addEventListener("online", flushQueue);
 
 function registerServiceWorker() {

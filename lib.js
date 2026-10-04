@@ -449,3 +449,27 @@ export function randomRoom(rng = (n) => crypto.getRandomValues(new Uint8Array(n)
       if (b < 248 && code.length < 8) code += alphabet[b % 31];
   return code;
 }
+
+/* Run an async task one at a time (flushQueue in app.js). A call while it
+   runs doesn't start a second copy, which would replay the same queued
+   writes twice; it shares the running promise and books one more run for
+   when this one settles, so work that arrived meanwhile isn't left waiting
+   for the next trigger. */
+export function serialRunner(task) {
+  let running = null;
+  let again = false;
+  return function run() {
+    if (running) {
+      again = true;
+      return running;
+    }
+    running = (async () => task())().finally(() => {
+      running = null;
+      if (again) {
+        again = false;
+        run().catch(() => {});
+      }
+    });
+    return running;
+  };
+}
