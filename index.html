@@ -74,9 +74,14 @@
       <h1 class="wordmark">Couplet<sup class="tm" aria-label="trademark">™</sup></h1>
       <p class="tagline">word games for two</p>
       <p class="join-teaser">Five little games. Every answer stays sealed<br />till you've both played.</p>
+      <p class="join-facts">Free. No sign-up. Each of you on your own phone.</p>
 
       <label class="room-label" for="name-input">Your name</label>
       <input id="name-input" class="room-input name-input" maxlength="14" autocomplete="given-name" spellcheck="false" placeholder="who's playing?" />
+
+      <label class="room-label" for="room-input">Parlor code</label>
+      <input id="room-input" class="room-input" maxlength="24" autocomplete="off" spellcheck="false" />
+      <p class="room-hint">Starting? Keep this code and send it to your person. Joining? Replace it with the code they sent you.</p>
 
       <!-- The glow buttons ARE the door — enterParlor() fires on tap. The old
            label ("Pick your glow") read as a preference toggle, and first-time
@@ -87,10 +92,7 @@
         <button class="identity-btn id-a" data-slot="A"><span class="id-dot"></span><span class="id-name" id="label-a">emerald</span></button>
         <button class="identity-btn id-b" data-slot="B"><span class="id-dot"></span><span class="id-name" id="label-b">mint</span></button>
       </div>
-
-      <label class="room-label" for="room-input">Parlor code</label>
-      <input id="room-input" class="room-input" maxlength="24" autocomplete="off" spellcheck="false" />
-      <p class="room-hint">Same code on both phones puts you in the same parlor.</p>
+      <p class="join-foot"><a class="switch-btn" href="privacy.html" target="_blank" rel="noopener">what we store</a><span class="footer-dot">·</span><a class="switch-btn" href="trailer.html" target="_blank" rel="noopener">the trailer</a><span class="footer-dot">·</span><a class="switch-btn" href="https://github.com/lymnal/couplet" target="_blank" rel="noopener">source</a></p>
     </div>
   </section>
 

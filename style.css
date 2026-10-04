@@ -250,6 +250,8 @@ body {
 }
 .room-input:focus { border-color: var(--gold); }
 .room-hint { color: var(--linen-dim); font-size: 0.8rem; max-width: 280px; }
+.join-facts { color: var(--linen-dim); font-size: 0.85rem; margin: 4px 0 18px; }
+.join-foot { margin-top: 20px; text-align: center; display: flex; flex-wrap: wrap; justify-content: center; }
 .name-input {
   font-family: "Rubik", system-ui, sans-serif; font-weight: 500; letter-spacing: 0.02em;
   width: 230px; margin-bottom: 14px;
