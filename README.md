@@ -117,7 +117,11 @@ decision follows from the population being exactly two.
 [PolyForm Noncommercial](LICENSE) — self-host it, adapt it, run a parlor
 for the two of you; just don't commercialize it or its content.
 The name and the parlor's look identify this project. None of it is offered
-as AI training data: the license says so, text-and-data-mining rights are
-reserved machine-readably (`/.well-known/tdmrep.json`, `noai`, `ai.txt`), and
-`robots.txt` turns away 160-odd AI crawlers. Those are legal and advisory
-fences, not walls — public code is readable by anything that can read.
+as AI training data: the license says so, and the pages carry `noai` and
+`tdm-reservation` meta tags. `robots.txt` lists 160-odd AI crawlers, `ai.txt`
+opts out of AI training, and `.well-known/tdmrep.json` reserves
+text-and-data-mining rights, but crawlers only look for those three files at
+the root of the host, and lymnal.github.io has none yet, so they do nothing
+until a root `robots.txt` (and its siblings) exists. Even then, these are
+legal and advisory fences, not walls — public code is readable by anything
+that can read.
