@@ -78,17 +78,31 @@ self.addEventListener("fetch", (e) => {
   if (isSupabase(url)) return;
 
   /* navigations: prefer network so a deploy lands promptly, fall back to the
-     cached shell when there's no signal */
+     cached shell when there's no signal. Only the real shell is stored as
+     ./index.html — a privacy, trailer or 404 page must never become the
+     offline app. */
   if (request.mode === "navigate") {
+    const scopePath = new URL("./", self.registration.scope).pathname;
+    const isShell =
+      url.pathname === scopePath || url.pathname === scopePath + "index.html";
     e.respondWith(
       fetch(request)
         .then((res) => {
-          const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put("./index.html", copy));
+          if (res.ok) {
+            const copy = res.clone();
+            caches
+              .open(CACHE)
+              .then((c) => c.put(isShell ? "./index.html" : request, copy));
+          }
           return res;
         })
         .catch(() =>
-          caches.match("./index.html").then((r) => r ?? caches.match("./")),
+          (isShell
+            ? caches.match("./index.html")
+            : caches
+                .match(request)
+                .then((r) => r ?? caches.match("./index.html"))
+          ).then((r) => r ?? caches.match("./")),
         ),
     );
     return;

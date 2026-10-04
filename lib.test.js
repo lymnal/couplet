@@ -6,6 +6,8 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import vm from "node:vm";
 import {
   applyDeckContent,
   validateDeck,
@@ -577,4 +579,70 @@ test("the book of nights reads in order with names", () => {
   assert.ok(lines.indexOf("2026-08-01") < lines.indexOf("2026-08-02"));
   assert.ok(txt.includes("  Ana\n    · rain\n    · you"));
   assert.ok(txt.includes("  Leo\n    · soup"));
+});
+
+/* ---- the service worker's navigation cache ----
+ * sw.js is not a module, so it runs here in a vm sandbox with a fake Cache
+ * Storage and network. What's under test is the promise in the README: the
+ * installed app opens to the game with no signal, whatever page was opened
+ * last. */
+const SCOPE = "https://lymnal.github.io/couplet/";
+function workerHarness() {
+  const store = new Map();
+  const keyOf = (r) => new URL(typeof r === "string" ? r : r.url, SCOPE).href;
+  const cache = {
+    add: async () => {},
+    put: async (req, res) => void store.set(keyOf(req), res),
+    match: async (req) => store.get(keyOf(req)),
+  };
+  const handlers = {};
+  const self = {
+    registration: { scope: SCOPE },
+    addEventListener: (type, fn) => (handlers[type] = fn),
+    skipWaiting: () => {},
+    clients: { claim: () => {} },
+  };
+  let net = null;
+  vm.runInNewContext(readFileSync(new URL("./sw.js", import.meta.url), "utf8"), {
+    self,
+    URL,
+    location: new URL("sw.js", SCOPE),
+    fetch: (req) => net(req),
+    caches: { open: async () => cache, match: cache.match, keys: async () => [], delete: async () => true },
+  });
+  /* navigate to `path` (relative to the scope); status 0 means no signal */
+  return async function navigate(path, status = 200) {
+    const url = new URL(path, SCOPE).href;
+    net = () =>
+      status
+        ? Promise.resolve({ ok: status < 400, status, page: path, clone() { return this; } })
+        : Promise.reject(new TypeError("offline"));
+    let reply;
+    handlers.fetch({ request: { method: "GET", mode: "navigate", url }, respondWith: (p) => (reply = p) });
+    const res = await reply;
+    await new Promise((r) => setImmediate(r)); // let the cache write land
+    return res?.page;
+  };
+}
+
+test("sw: opening a non-shell page never replaces the offline app", async () => {
+  const nav = workerHarness();
+  await nav("./");
+  await nav("privacy.html");
+  assert.equal(await nav("./", 0), "./");
+});
+
+test("sw: a 404 navigation is never cached as the offline app", async () => {
+  const nav = workerHarness();
+  await nav("./");
+  await nav("no-such-page", 404);
+  assert.equal(await nav("./", 0), "./");
+});
+
+test("sw: offline, a visited page serves itself and anything else gets the shell", async () => {
+  const nav = workerHarness();
+  await nav("privacy.html");
+  await nav("./?room=ABCDEFGH");
+  assert.equal(await nav("privacy.html", 0), "privacy.html");
+  assert.equal(await nav("trailer.html", 0), "./?room=ABCDEFGH");
 });
