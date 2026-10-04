@@ -444,7 +444,7 @@
 <div class="modal-backdrop hidden" id="name-modal" role="dialog" aria-modal="true" aria-label="change your name">
   <div class="modal-card">
     <p class="modal-eyebrow">change your name</p>
-    <input id="name-edit" class="room-input name-input" maxlength="14" spellcheck="false" />
+    <input id="name-edit" class="room-input name-input" maxlength="14" spellcheck="false" aria-label="your name" />
     <div class="modal-actions">
       <button class="ghost-btn" id="name-cancel">cancel</button>
       <button class="submit-btn" id="name-save">save</button>
@@ -456,8 +456,8 @@
   <div class="modal-card">
     <p class="modal-eyebrow">delete this parlor</p>
     <p class="modal-body">This erases everything, for <b>both</b> of you — every note,
-      the photo, your Four Things nights, your Inklings, your streak. Your partner
-      is not asked first, and none of it can be recovered.</p>
+      the photo, your Four Things nights, your Inklings, your streak.
+      The other person is not asked first, and none of it can be recovered.</p>
     <label class="room-label" for="delete-confirm">Type the parlor code to confirm</label>
     <input id="delete-confirm" class="room-input" maxlength="24" autocomplete="off" spellcheck="false" />
     <div class="modal-actions">
@@ -469,8 +469,8 @@
 
 <div class="modal-backdrop hidden" id="note-modal" role="dialog" aria-modal="true" aria-label="leave a note">
   <div class="modal-card">
-    <p class="modal-eyebrow">for your favorite person</p>
-    <textarea id="note-text" class="note-text" maxlength="280" rows="4" placeholder="something sweet…"></textarea>
+    <p class="modal-eyebrow">for your person</p>
+    <textarea id="note-text" class="note-text" maxlength="280" rows="4" aria-label="your note to them" placeholder="something for them…"></textarea>
     <div class="modal-actions">
       <button class="ghost-btn" id="note-cancel">cancel</button>
       <button class="submit-btn" id="note-save">pin it 💌</button>
