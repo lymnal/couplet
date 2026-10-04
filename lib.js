@@ -433,3 +433,19 @@ export function settleQueue(current, succeededKeys) {
   const done = new Set(succeededKeys);
   return current.filter((i) => !done.has(queueKey(i)));
 }
+
+/* The server refuses a keepsake longer than this (set_keepsake in
+   supabase/setup.sql), so the app checks the same number before uploading. */
+export const KEEPSAKE_MAX = 1200000;
+
+/* A fresh parlor code. 31 symbols with no look-alikes (no I, L, O, 0, 1).
+   Bytes of 248 (31 × 8) and up are thrown away and redrawn, because
+   `byte % 31` on them would make the first eight symbols more likely. */
+export function randomRoom(rng = (n) => crypto.getRandomValues(new Uint8Array(n))) {
+  const alphabet = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+  let code = "";
+  while (code.length < 8)
+    for (const b of rng(8 - code.length))
+      if (b < 248 && code.length < 8) code += alphabet[b % 31];
+  return code;
+}

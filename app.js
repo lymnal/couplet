@@ -42,6 +42,8 @@ import {
   queueKey,
   enqueue,
   settleQueue,
+  KEEPSAKE_MAX,
+  randomRoom,
 } from "./lib.js?v=18";
 
 const CFG = window.COUPLET_CONFIG;
@@ -542,7 +544,9 @@ function scheduleRejoin(ms = 1500) {
 async function resync() {
   if (!supa || !room) return;
   try {
-    const { data } = await supa.rpc("get_room", { p_code: room });
+    const { data, error } = await supa.rpc("get_room", { p_code: room });
+    if (error) throw error;
+    reportOk();
     applyRemote(data);
   } catch (e) {
     reportError("resync", e);
@@ -2506,8 +2510,12 @@ function wire() {
     if (!file) return;
     toast("tucking it into the frame…");
     try {
-      const dataUrl = await shrinkImage(file, 1100, 0.82);
-      if (dataUrl.length > 1400000)
+      let dataUrl = await shrinkImage(file, 1100, 0.82);
+      /* the server refuses anything over KEEPSAKE_MAX — one smaller try
+         before giving up, so a busy photo doesn't fail with "try again" */
+      if (dataUrl.length > KEEPSAKE_MAX)
+        dataUrl = await shrinkImage(file, 900, 0.75);
+      if (dataUrl.length > KEEPSAKE_MAX)
         return toast("that one's too big — try another");
       const { error } = await supa.rpc("set_keepsake", {
         p_code: room,
@@ -3317,14 +3325,6 @@ function renderAll() {
      timeout when hidden — batching still works, it just isn't frame-aligned. */
   if (document.visibilityState === "visible") requestAnimationFrame(run);
   else setTimeout(run, 0);
-}
-
-function randomRoom() {
-  const alphabet = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
-  const bytes = crypto.getRandomValues(new Uint8Array(8));
-  let code = "";
-  for (const b of bytes) code += alphabet[b % alphabet.length];
-  return code;
 }
 
 (function boot() {

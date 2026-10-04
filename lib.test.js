@@ -43,6 +43,8 @@ import {
   queueKey,
   enqueue,
   settleQueue,
+  KEEPSAKE_MAX,
+  randomRoom,
 } from "./lib.js";
 
 test("otherSlot flips both ways", () => {
@@ -684,4 +686,26 @@ test("enqueue caps the queue at 50 keeping the newest", () => {
   assert.equal(q.length, 50);
   assert.equal(q[0].id, "10");
   assert.equal(q.at(-1).id, "59");
+});
+
+/* ---- parlor codes and the photo cap ---- */
+test("randomRoom returns 8 chars from the room alphabet", () => {
+  for (let i = 0; i < 200; i++)
+    assert.match(randomRoom(), /^[ABCDEFGHJKMNPQRSTUVWXYZ2-9]{8}$/);
+});
+
+test("randomRoom rejects bytes >= 248", () => {
+  /* 31 symbols: a byte of 248 or more would favour the first eight of them */
+  const seq = [255, 248, 0, 1, 2, 3, 4, 5, 6, 7];
+  let i = 0;
+  const rng = (n) => Uint8Array.from({ length: n }, () => seq[i++ % seq.length]);
+  const code = randomRoom(rng);
+  assert.equal(code[0], "A");
+  assert.equal(code, "ABCDEFGH");
+  assert.equal(randomRoom(() => Uint8Array.from({ length: 8 }, () => 247)), "99999999");
+});
+
+test("the photo cap matches the server's keepsake limit", () => {
+  const sql = readFileSync(new URL("./supabase/setup.sql", import.meta.url), "utf8");
+  assert.equal(KEEPSAKE_MAX, Number(sql.match(/length\(p_data\) > (\d+)/)[1]));
 });
